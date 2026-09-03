@@ -1,0 +1,13 @@
+Requisitos não funcionais
+01 — Segurança: os dados pessoais dos usuários devem ser armazenados e protegidos de forma segura.
+02 — Privacidade: o sistema deve garantir a privacidade das informações pessoais e de localização dos usuários.
+03 — Usabilidade: a interface deve ser simples e intuitiva, permitindo que o usuário encontre ou ofereça uma carona com poucos passos.
+04 — Desempenho: as principais funções do aplicativo, como buscar caronas e carregar perfis, devem responder rapidamente.
+05 — Disponibilidade: o aplicativo deve estar disponível para utilização na maior parte do tempo, especialmente nos horários de entrada e saída das universidades.
+06 — Compatibilidade: o sistema deve funcionar adequadamente em dispositivos Android e iOS.
+07 — Escalabilidade: o sistema deve ser capaz de suportar o aumento do número de usuários e caronas sem perda significativa de desempenho.
+08 — Confiabilidade: as informações sobre caronas, horários e solicitações devem ser armazenadas corretamente, evitando perda de dados.
+09 — Facilidade de manutenção: o sistema deve ser desenvolvido de forma organizada, permitindo atualizações e correções futuras.
+10 — Acessibilidade: a interface deve considerar diferentes necessidades dos usuários, utilizando textos legíveis, contraste adequado e elementos de fácil identificação.
+11 — Consumo de dados: o aplicativo deve buscar utilizar uma quantidade moderada de internet e bateria, especialmente durante o uso de localização.
+12 — Proteção contra fraudes: o sistema deve possuir mecanismos para identificar contas falsas, comportamentos suspeitos e tentativas de uso indevido da plataforma.
