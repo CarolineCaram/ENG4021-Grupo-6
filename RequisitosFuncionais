@@ -1,0 +1,21 @@
+Requisitos funcionais
+01 — Cadastro de usuário: o sistema deve permitir que estudantes criem uma conta informando nome, e-mail, universidade, curso e outras informações necessárias.
+02 — Login: o sistema deve permitir que o usuário faça login utilizando suas credenciais.
+03 — Perfil do usuário: o sistema deve permitir visualizar e editar informações do perfil.
+04 — Verificação de usuário: o sistema deve permitir verificar se o usuário pertence à universidade informada, aumentando a segurança da plataforma.
+05 — Cadastro de veículo: o sistema deve permitir que usuários que possuem carro cadastrem informações sobre o veículo.
+06 — Oferecer carona: o usuário motorista deve poder cadastrar uma carona informando origem, destino, data, horário, número de vagas e possíveis observações.
+07 — Buscar carona: o usuário passageiro deve poder pesquisar caronas utilizando origem, destino, data e horário como filtros.
+08 — Visualizar caronas disponíveis: o sistema deve apresentar as opções de carona compatíveis com a busca realizada.
+09 — Solicitar carona: o passageiro deve poder solicitar uma vaga em uma carona disponível.
+10 — Aceitar ou recusar solicitação: o motorista deve poder aceitar ou recusar solicitações de passageiros.
+11 — Gerenciar caronas: o motorista deve poder editar ou cancelar uma carona previamente cadastrada.
+12 — Confirmação de carona: o sistema deve informar aos usuários quando uma carona for confirmada.
+13 — Informações da carona: o sistema deve apresentar aos participantes informações como motorista, passageiros, horário, origem, destino e ponto de encontro.
+14 — Chat: o sistema deve permitir a comunicação entre motorista e passageiros para combinar detalhes da viagem.
+15 — Notificações: o sistema deve enviar notificações sobre solicitações, confirmações, cancelamentos e alterações nas caronas.
+16 — Avaliação: após a realização da carona, os usuários devem poder avaliar uns aos outros.
+17 — Histórico: o sistema deve permitir que o usuário visualize suas caronas anteriores.
+18 — Denúncia: o usuário deve poder denunciar comportamentos inadequados ou problemas ocorridos durante uma carona.
+19 — Compartilhamento de localização: o sistema pode permitir o compartilhamento da localização durante a viagem para aumentar a segurança.
+20 — Controle de vagas: o sistema deve atualizar automaticamente o número de vagas disponíveis conforme as solicitações forem confirmadas.
