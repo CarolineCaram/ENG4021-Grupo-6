@@ -1,0 +1,28 @@
+ENG4021: PROJETO INTEGRADO - SOFTWARE
+Joana Arrais de Lima Mello (2510227)
+Tarefa: Listar 20 hipóteses sobre o problema
+1. Os alunos da PUC-Rio gastam muito dinheiro indo para a faculdade.
+2. Os alunos perdem muito tempo no deslocamento até a faculdade.
+3. Os alunos economizariam muito dinheiro usando o aplicativo.
+4. Os alunos se incomodam mais com a lotação e o trânsito do que com o custo da
+viagem.
+5. Muitos alunos vão de carro para a faculdade com lugares vazios no carro.
+6. Os alunos que dirigem topariam dar carona se fosse fácil de organizar.
+7. Os alunos já tentam se organizar por grupos de WhatsApp, mas de forma bagunçada.
+8. Os alunos que oferecem carona se concentram em poucos bairros, como Barra, Recreio
+e Zona Sul.
+9. Os alunos que pegam carona valorizam mais o horário certo do que o preço baixo.
+10. Há mais alunos querendo pegar carona do que oferecendo.
+11. Os alunos confiam mais em uma carona sabendo que a outra pessoa também é da
+PUC.
+12. Os alunos só trocam o WhatsApp pelo aplicativo se ele achar carona mais rápido.
+13. Os alunos preferem caronas fixas na semana do que caronas avulsas.
+14. Os alunos desistem do aplicativo se não acharem uma carona logo nas primeiras
+tentativas.
+15. Os alunos adotam o aplicativo mais rápido quando gente do próprio curso já usa.
+16. Os alunos não usam o aplicativo se ele parecer vazio no começo.
+17. As alunas só pegam carona se sentirem que é seguro e que a pessoa é verificada.
+18. Os alunos participam mais quando existe um sistema de avaliação e histórico de
+viagens.
+19. Os alunos não aceitam pagar uma comissão pelo aplicativo, só dividir a gasolina.
+20. Os alunos abandonam o aplicativo se conseguem carona só na ida e ficam sem volta.
