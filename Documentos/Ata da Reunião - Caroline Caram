@@ -1,0 +1,21 @@
+Ata da Reunião
+Pauta
+Apresentação da ideia do projeto
+Discussão sobre o que vai entrar na primeira versão
+Pontos de atenção (segurança, custo, divulgação)
+Divisão geral do trabalho
+Próximos passos
+O que foi discutido
+
+A reunião começou com a apresentação da proposta do CaronaU: um site onde alunos da faculdade podem oferecer ou pedir carona, com cadastro restrito a quem tem e-mail institucional e um sistema de avaliação entre motorista e passageiro depois de cada carona. O grupo concordou que o problema é real, já que muita gente hoje se organiza de forma informal em grupos de WhatsApp, sem nenhuma garantia de segurança.
+Na sequência, foi discutido o que faria parte da primeira versão do site. Ficou combinado que o foco deve ser só o essencial — cadastro, publicação e busca de carona, e avaliação — para não comprometer o prazo do semestre. Funcionalidades mais complexas, como pagamento integrado ao site e aplicativo de celular, foram deixadas de fora por enquanto, podendo ser avaliadas em uma etapa futura do projeto.
+Também foi comentado sobre a importância de deixar claro, desde o início, que o valor combinado entre motorista e passageiro é apenas um rateio de despesas, e não um serviço pago, além da necessidade de ter uma política de privacidade simples para lidar com os dados pessoais que o site vai armazenar.
+Por fim, o grupo conversou sobre a estratégia de divulgação, já que o maior risco do projeto não é técnico, e sim conseguir gente suficiente cadastrada para que o site seja útil. A ideia discutida foi começar com um lançamento restrito, testando com um público menor antes de tentar alcançar toda a faculdade.
+
+Divisão do trabalho
+Ficou combinado que os integrantes vão se dividir entre as partes técnicas do projeto (desenvolvimento do site e banco de dados) e as partes de organização (design das telas e planejamento de divulgação), com cada um assumindo uma frente de acordo com sua disponibilidade e afinidade.
+
+Combinados
+Cada integrante deve trazer sua parte encaminhada até a próxima reunião
+O grupo deve se reunir novamente em uma semana para acompanhar o andamento
+Dúvidas ou dificuldades devem ser compartilhadas com o grupo assim que surgirem, para não travar o andamento do projeto
