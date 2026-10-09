@@ -177,4 +177,10 @@ button:hover {
     gap: 32px;
     padding: 24px;
   }
+  .erro {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin: -8px 0 12px;
+  min-height: 1.2em;
+}
 }

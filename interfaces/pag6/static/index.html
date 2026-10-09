@@ -26,18 +26,24 @@
         <h2>Bem-vindo de volta</h2>
         <p class="subtitulo">Entre com seus dados de acesso</p>
 
-        <label for="email">E-mail</label>
-        <input id="email" type="email" placeholder="seu@email.com">
+        <form id="form-login">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" placeholder="seu@email.com" required>
 
-        <label for="senha">Senha</label>
-        <input id="senha" type="password" placeholder="Sua senha">
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" placeholder="Sua senha" required>
 
-        <button>Entrar</button>
+          <p id="mensagem-erro" class="erro"></p>
+
+          <button type="submit">Entrar</button>
+        </form>
 
         <p class="cadastro">Não tem conta? <a href="cadastro.html">Cadastre-se</a></p>
       </div>
     </section>
 
   </main>
+
+  <script src="login.js"></script>
 </body>
 </html>
