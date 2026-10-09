@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #172554;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .caixa {
+      background-color: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 40px;
+      width: 360px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #2563EB;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-top: 0;
+    }
+
+    p {
+      color: #64748B;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      background-color: #2563EB;
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      margin-top: 24px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    a {
+      color: #2563EB;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+    <h2>vaijunto</h2>
+    <h1>Criar sua conta</h1>
+    <p>Cadastre-se para encontrar e oferecer caronas com estudantes da sua faculdade.</p>
+
+    <label>Nome completo</label>
+    <input type="text" placeholder="Seu nome">
+
+    <label>E-mail institucional</label>
+    <input type="email" placeholder="seu@email.com">
+
+    <label>Universidade</label>
+    <select>
+      <option>Selecione sua universidade</option>
+      <option>PUC-Rio</option>
+      <option>UFF</option>
+      <option>UFRJ</option>
+      <option>Outra</option>
+    </select>
+
+    <label>Curso</label>
+    <input type="text" placeholder="Seu curso">
+
+    <label>Senha</label>
+    <input type="password" placeholder="Crie uma senha">
+
+    <button>Cadastrar</button>
+
+    <p>Já tem conta? <a href="login.html">Entrar</a></p>
+  </div>
+
+</body>
+</html>
