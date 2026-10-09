@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniRide</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <main class="pagina">
+
+    <section class="lado-info">
+      <h2 class="logo">UniRide</h2>
+
+      <div class="chamada">
+        <h1>Sua carona começa aqui</h1>
+        <p>Entre na sua conta para ver as rotas disponíveis e conectar com outros estudantes da sua faculdade.</p>
+      </div>
+
+      <small class="copyright">© 2026 UniRide</small>
+    </section>
+
+    <section class="lado-form">
+      <div class="form-box">
+        <h2>Bem-vindo de volta</h2>
+        <p class="subtitulo">Entre com seus dados de acesso</p>
+
+        <form id="form-login">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" placeholder="seu@email.com" required>
+
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" placeholder="Sua senha" required>
+
+          <p id="mensagem-erro" class="erro"></p>
+
+          <button type="submit">Entrar</button>
+        </form>
+
+        <p class="cadastro">Não tem conta? <a href="cadastro.html">Cadastre-se</a></p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="login.js"></script>
+</body>
+</html>
