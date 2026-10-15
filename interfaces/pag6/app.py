@@ -22,8 +22,8 @@ def conectar():
 
 
 @app.route("/")
-def pagina_login():
-    return app.send_static_file("index.html")
+def pagina_inicial():
+    return app.send_static_file("indexPag4.html")
 
 
 @app.route("/login", methods=["POST"])
