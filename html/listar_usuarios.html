@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuários</title>
+  <link rel="stylesheet" href="{% static 'css/listar_usuarios.css' %}">
+</head>
+<body>
+  <main class="pagina">
+    <header class="topo">
+      <h1>Usuários</h1>
+      <a class="botao botao-primario" href="{% url 'registrar_usuario' %}">Novo usuário</a>
+    </header>
+
+    {% if usuarios %}
+    <div class="tabela-wrap">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Username</th>
+            <th>E-mail</th>
+            <th class="col-acoes">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for usuario in usuarios %}
+          <tr>
+            <td data-label="Nome">{{ usuario.nome }}</td>
+            <td data-label="Username">{{ usuario.username }}</td>
+            <td data-label="E-mail">{{ usuario.email }}</td>
+            <td data-label="Ações" class="col-acoes">
+              <a class="botao botao-secundario" href="{% url 'editar_usuario' usuario.id %}">Editar</a>
+              <a class="botao botao-perigo" href="{% url 'remover_usuario' usuario.id %}">Remover</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="vazio">
+      <p>Nenhum usuário cadastrado ainda.</p>
+      <a class="botao botao-primario" href="{% url 'registrar_usuario' %}">Cadastrar o primeiro usuário</a>
+    </div>
+    {% endif %}
+  </main>
+</body>
+</html>
