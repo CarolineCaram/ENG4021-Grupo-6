@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniRide - Início</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .inicio { max-width: 420px; margin: 20vh auto; padding: 24px; text-align: center; }
+    .inicio h1 { margin-bottom: 8px; }
+    .inicio p { color: #5f7685; margin-bottom: 24px; }
+  </style>
+</head>
+
+<body>
+  <main class="inicio">
+    <h1 id="saudacao">Carregando...</h1>
+    <p>Em breve, as rotas disponíveis vão aparecer aqui.</p>
+    <button id="botao-sair">Sair</button>
+  </main>
+
+  <script>
+    // Pergunta ao servidor quem está logado. Se ninguém, volta para o login.
+    async function verificarLogin() {
+      const resposta = await fetch("/me");
+
+      if (resposta.status !== 200) {
+        window.location.href = "/";
+        return;
+      }
+
+      const dados = await resposta.json();
+      document.getElementById("saudacao").textContent = "Olá, " + dados.nome + "!";
+    }
+
+    document.getElementById("botao-sair").addEventListener("click", async function () {
+      await fetch("/logout", { method: "POST" });
+      window.location.href = "/";
+    });
+
+    verificarLogin();
+  </script>
+</body>
+</html>
