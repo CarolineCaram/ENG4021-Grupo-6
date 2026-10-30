@@ -6,4 +6,4 @@ Aplicação web desenvolvida em **Django** para caronas universitárias (Discipl
 
 1. Abra a pasta `BancoDados`:
    ```bash
-   cd BancoDados
+   cd BancoDados 
