@@ -1,0 +1,190 @@
+/* ---------- Variáveis (mesmas cores e fontes da tela inicial) ---------- */
+:root {
+  --azul: #1858e8;
+  --azul-escuro: #0f45c0;
+  --azul-claro: #e7eefd;
+  --verde: #78bc48;
+  --tinta: #102040;
+  --tinta-suave: #4f5b73;
+  --fundo: #f6f8fc;
+  --branco: #ffffff;
+  --linha: #dde3ee;
+  --erro: #b3261e;
+
+  --fonte-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --fonte-texto: "DM Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--fonte-texto);
+  color: var(--tinta);
+  background: var(--fundo);
+  line-height: 1.6;
+}
+
+h1, h2 {
+  font-family: var(--fonte-titulo);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 3px;
+}
+
+/* ---------- Estrutura: duas colunas ---------- */
+.pagina {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  min-height: 100vh;
+}
+
+/* ---------- Lado esquerdo ---------- */
+.lado-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2.5rem 4vw;
+  background: var(--azul-claro);
+  border-right: 1px solid var(--linha);
+}
+
+.logo { display: block; line-height: 0; width: fit-content; }
+.logo img { height: 64px; width: auto; }
+
+.chamada h1 {
+  font-size: clamp(2rem, 3.6vw, 3.2rem);
+  font-weight: 800;
+  max-width: 11em;
+}
+
+.chamada p {
+  margin-top: 1.2rem;
+  max-width: 30em;
+  font-size: 1.1rem;
+  color: var(--tinta-suave);
+}
+
+.copyright {
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Lado direito (formulário) ---------- */
+.lado-form {
+  display: grid;
+  place-items: center;
+  padding: 2rem 5vw;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  background: var(--branco);
+  border: 2px solid var(--tinta);
+  border-radius: 10px;
+  box-shadow: 8px 8px 0 var(--azul);
+}
+
+.form-box h2 { font-size: 1.9rem; font-weight: 800; }
+
+.subtitulo {
+  margin-top: 0.3rem;
+  color: var(--tinta-suave);
+}
+
+form { margin-top: 1.6rem; }
+
+label {
+  display: block;
+  margin-top: 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.8rem 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--tinta);
+  background: var(--branco);
+  border: 2px solid var(--linha);
+  border-radius: 6px;
+}
+
+input::placeholder { color: #8a94a8; }
+
+input:focus {
+  outline: none;
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(24, 88, 232, 0.2);
+}
+
+/* Mensagem de erro do login (preenchida pelo login.js) */
+.erro {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--erro);
+}
+.erro:empty { display: none; }
+
+button[type="submit"] {
+  width: 100%;
+  margin-top: 1.4rem;
+  padding: 0.85rem 1.4rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--branco);
+  background: var(--azul);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+button[type="submit"]:hover { background: var(--azul-escuro); }
+button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.cadastro {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
+}
+
+.cadastro a {
+  font-weight: 700;
+  color: var(--azul);
+}
+.cadastro a:hover { text-decoration: underline; }
+
+/* ---------- Celular e tablet ---------- */
+@media (max-width: 860px) {
+  .pagina { grid-template-columns: 1fr; min-height: 0; }
+
+  .lado-info {
+    padding: 1.5rem 6vw 2rem;
+    border-right: none;
+    border-bottom: 1px solid var(--linha);
+  }
+  .logo img { height: 52px; }
+  .copyright { display: none; }
+
+  .lado-form { padding: 2.5rem 6vw 3rem; }
+}
+
+@media (max-width: 480px) {
+  .form-box { padding: 1.5rem; box-shadow: 6px 6px 0 var(--azul); }
+}
