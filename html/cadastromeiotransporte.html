@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto - meio de transporte</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; display: flex; min-height: 100vh; }
+
+    .esquerda {
+      background-color: #172554; color: #fff; width: 40%; padding: 30px;
+      box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .esquerda h1 { font-size: 28px; margin-bottom: 10px; }
+    .esquerda p { color: #60A5FA; font-size: 14px; line-height: 1.5; max-width: 340px; }
+    .copyright { font-size: 12px; color: #64748B; }
+
+    .direita { background-color: #F8FAFC; width: 60%; display: flex; justify-content: center; align-items: center; }
+    .caixa { width: 340px; }
+    .barras { display: flex; gap: 6px; margin-bottom: 20px; }
+    .barras div { background-color: #2563EB; height: 4px; flex: 1; }
+    h2 { color: #172554; margin-bottom: 4px; }
+    .etapa { color: #64748B; font-size: 13px; margin: 0 0 20px; }
+
+    .opcao {
+      display: flex; align-items: center; background-color: #fff; border: 1px solid #E2E8F0;
+      border-radius: 10px; padding: 12px; margin-bottom: 10px; cursor: pointer;
+    }
+    .opcao:hover { border-color: #2563EB; }
+    .icone { font-size: 22px; background-color: #F1F5F9; padding: 8px; border-radius: 8px; margin-right: 12px; }
+    .info { flex: 1; }
+    .info b { display: block; font-size: 14px; color: #172554; }
+    .info span { font-size: 12px; color: #64748B; }
+
+    button {
+      width: 100%; background-color: #2563EB; color: #fff; border: none; padding: 12px;
+      border-radius: 8px; font-size: 15px; margin-top: 10px; cursor: pointer;
+    }
+    button:hover { background-color: #1d4ed8; }
+    button:disabled { background-color: #93B4F5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <div class="esquerda">
+    <b>vaijunto</b>
+    <div>
+      <h1>Qual é o seu meio de transporte?</h1>
+      <p>Escolha como você vai ou oferece transporte. Isso nos ajuda a encontrar a combinação ideal para você.</p>
+    </div>
+    <div class="copyright">© 2026 Vaijunto</div>
+  </div>
+
+  <div class="direita">
+    <div class="caixa">
+      <div class="barras"><div></div><div></div><div></div><div></div></div>
+
+      <h2>Meio de transporte</h2>
+      <p class="etapa">Etapa 4 de 4 · Quase pronto!</p>
+
+      <label class="opcao">
+        <div class="icone">🚗</div>
+        <div class="info"><b>Carro</b><span>Ofereço carona no meu carro</span></div>
+        <input type="radio" name="transporte" onclick="liberar()">
+      </label>
+
+      <label class="opcao">
+        <div class="icone">🏍️</div>
+        <div class="info"><b>Moto</b><span>Ofereço carona de moto (1 passageiro)</span></div>
+        <input type="radio" name="transporte" onclick="liberar()">
+      </label>
+
+      <label class="opcao">
+        <div class="icone">🙋</div>
+        <div class="info"><b>Passageiro</b><span>Estou procurando uma carona</span></div>
+        <input type="radio" name="transporte" onclick="liberar()">
+      </label>
+
+      <label class="opcao">
+        <div class="icone">🚐</div>
+        <div class="info"><b>Van / Micro-ônibus</b><span>Ofereço transporte em van</span></div>
+        <input type="radio" name="transporte" onclick="liberar()">
+      </label>
+
+      <label class="opcao">
+        <div class="icone">🚲</div>
+        <div class="info"><b>Bicicleta</b><span>Vou de bicicleta e busco companhia</span></div>
+        <input type="radio" name="transporte" onclick="liberar()">
+      </label>
+
+      <button id="botao" disabled>Selecione uma opção</button>
+    </div>
+  </div>
+
+  <script>
+    function liberar() {
+      document.getElementById("botao").disabled = false;
+      document.getElementById("botao").innerText = "Continuar";
+    }
+  </script>
+
+</body>
+</html>
