@@ -6,4 +6,7 @@ Aplicação web desenvolvida em **Django** para caronas universitárias (Discipl
 
 1. Abra a pasta `BancoDados`:
    ```bash
-   cd BancoDados 
+   cd BancoDados
+pip install django
+python manage.py migrate
+python manage.py runserver
