@@ -25,12 +25,11 @@ SECRET_KEY = "django-insecure-n+_^ube^0x(_7*7tn!pxgq)ex&6z9j^3$xnf#nhz0n194u7_kn
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.github.dev',
-    'https://*.app.github.dev',
-    'https://localhost:8001',
-    'http://localhost:8001',
+    'https://localhost:8000',
+    'http://localhost:8000',
+    'https://*.app.github.dev',  
 ]
 
 
@@ -121,7 +120,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 
 # Email
