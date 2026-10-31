@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Instituicao, Usuario, Rota
+from vai_junto.models import (Instituicao, Usuario, Rota, Solicitacao,
+                              Grupo, Mensagem, Carona, Avaliacao)
 
-admin.site.register(Instituicao)
-admin.site.register(Usuario)
-admin.site.register(Rota)
+for modelo in (Instituicao, Usuario, Rota, Solicitacao,
+               Grupo, Mensagem, Carona, Avaliacao):
+    admin.site.register(modelo)
