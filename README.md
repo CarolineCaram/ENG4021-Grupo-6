@@ -8,7 +8,7 @@ O VaiJunto conecta estudantes que fazem o mesmo trajeto até a faculdade, para q
 
 - Cadastro e login de usuários
 - Cadastro de veículo e meio de transporte
-- Oferta de rotas (origem, horário, transporte e vagas)
+- Oferta de rotas (origem, horário, transporte e vagas) 
 - Busca de rotas por origem
 - Grupos por rota, com mensagens entre os participantes
 - Caronas agendadas, com lista de passageiros
