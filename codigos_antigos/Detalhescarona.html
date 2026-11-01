@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detalhes da carona</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    main { max-width: 500px; margin: 0 auto; background: white; padding: 20px; }
+    button { padding: 8px 16px; background: #1f5fbf; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Detalhes da carona</h1>
+
+    <p><strong>Origem:</strong> {{ carona.origem }}</p>
+    <p><strong>Destino:</strong> {{ carona.destino }}</p>
+    <p><strong>Horário:</strong> {{ carona.horario }}</p>
+    <p><strong>Vagas:</strong> {{ carona.vagas }}</p>
+    <p><strong>Motorista:</strong> {{ carona.motorista.nome }}</p>
+
+    <form method="post" action="{% url 'solicitar_vaga' carona.id %}">
+      {% csrf_token %}
+      <button type="submit">Solicitar vaga</button>
+    </form>
+  </main>
+</body>
+</html>

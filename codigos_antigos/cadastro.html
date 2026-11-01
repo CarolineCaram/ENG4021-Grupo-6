@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>vaijunto</title>
 
-  <style> 
+  <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #F8FAFC;
@@ -50,13 +50,13 @@
       margin-bottom: 4px;
     }
 
-    input[type="email"],
-    input[type="password"] {
+    input, select {
       width: 100%;
       padding: 10px;
       border: 1px solid #E2E8F0;
       border-radius: 8px;
       box-sizing: border-box;
+      font-size: 14px;
     }
 
     button {
@@ -86,18 +86,33 @@
 
   <div class="caixa">
     <h2>vaijunto</h2>
-    <h1>Sua carona começa aqui</h1>
-    <p>Entre na sua conta para ver as rotas disponíveis e conectar com outros estudantes da sua faculdade.</p>
+    <h1>Criar sua conta</h1>
+    <p>Cadastre-se para encontrar e oferecer caronas com estudantes da sua faculdade.</p>
 
-    <label>E-mail</label>
+    <label>Nome completo</label>
+    <input type="text" placeholder="Seu nome">
+
+    <label>E-mail institucional</label>
     <input type="email" placeholder="seu@email.com">
 
+    <label>Universidade</label>
+    <select>
+      <option>Selecione sua universidade</option>
+      <option>PUC-Rio</option>
+      <option>UFF</option>
+      <option>UFRJ</option>
+      <option>Outra</option>
+    </select>
+
+    <label>Curso</label>
+    <input type="text" placeholder="Seu curso">
+
     <label>Senha</label>
-    <input type="password" placeholder="Sua senha">
+    <input type="password" placeholder="Crie uma senha">
 
-    <button>Entrar</button>
+    <button>Cadastrar</button>
 
-    <p>Não tem conta? <a href="cadastro.html">Cadastre-se</a></p>
+    <p>Já tem conta? <a href="login.html">Entrar</a></p>
   </div>
 
 </body>

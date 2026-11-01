@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #172554;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .caixa {
+      background-color: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 40px;
+      width: 360px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #2563EB;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-top: 0;
+    }
+
+    p {
+      color: #64748B;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .dias {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .dias span {
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 8px 0;
+      width: 13%;
+      font-size: 13px;
+      color: #64748B;
+      cursor: pointer;
+    }
+
+    button {
+      width: 100%;
+      background-color: #2563EB;
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      margin-top: 24px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+    <h2>vaijunto</h2>
+    <h1>Configuração de rota</h1>
+    <p>Informe seu trajeto para encontrarmos estudantes com caminhos parecidos.</p>
+
+    <label>Origem</label>
+    <input type="text" placeholder="Seu bairro ou endereço">
+
+    <label>Destino</label>
+    <input type="text" placeholder="Sua faculdade">
+
+    <label>Horário de saída</label>
+    <input type="time">
+
+    <label>Dias da semana</label>
+    <div class="dias">
+      <span>Seg</span>
+      <span>Ter</span>
+      <span>Qua</span>
+      <span>Qui</span>
+      <span>Sex</span>
+    </div>
+
+    <button>Buscar caronas</button>
+  </div>
+
+</body>
+</html>
