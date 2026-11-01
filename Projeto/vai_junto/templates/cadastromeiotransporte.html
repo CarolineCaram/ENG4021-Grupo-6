@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto - meio de transporte</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+  <div class="esquerda">
+    <div class="logo">vaijunto</div>
+
+    <div>
+      <h1>Qual é o seu meio de transporte?</h1>
+      <p>Escolha como você vai ou oferece transporte. Isso nos ajuda a encontrar a combinação ideal para você.</p>
+    </div>
+
+    <div class="copyright">© 2026 Vaijunto</div>
+  </div>
+
+  <div class="direita">
+    <div class="caixa">
+
+      <div class="barras">
+        <div class="barra"></div>
+        <div class="barra"></div>
+        <div class="barra"></div>
+        <div class="barra"></div>
+      </div>
+
+      <h2>Meio de transporte</h2>
+      <p class="etapa">Etapa 4 de 4 · Quase pronto!</p>
+
+      <label class="opcao">
+        <div class="icone">🚗</div>
+        <div class="info">
+          <b>Carro</b>
+          <span>Ofereço carona no meu carro</span>
+        </div>
+        <input type="radio" name="transporte" onclick="liberar()">
+      </label>
+
+      <label class="opcao">
+        <div class="icone">🏍️</div>
+        <div class="info">
+          <b>Moto</b>
+          <span>Ofereço carona de moto (1 passageiro)</span>
+        </div>
+        <input type="radio" name="transporte" onclick="liberar()">
+      </label>
+
+      <label class="opcao">
+        <div class="icone">🙋</div>
+        <div class="info">
+          <b>Passageiro</b>
+          <span>Estou procurando uma carona</span>

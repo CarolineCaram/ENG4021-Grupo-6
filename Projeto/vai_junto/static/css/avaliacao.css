@@ -1,0 +1,98 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #F8FAFC;
+  color: #172554;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.caixa {
+  background-color: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 40px;
+  width: 360px;
+  text-align: center;
+}
+
+h2 {
+  color: #2563EB;
+  margin-bottom: 4px;
+}
+
+h1 {
+  font-size: 20px;
+  margin-top: 0;
+}
+
+p {
+  color: #64748B;
+  font-size: 14px;
+}
+
+.foto {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: #2563EB;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 10px auto 6px;
+}
+
+.nome {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.estrelas {
+  font-size: 34px;
+  color: #FACC15;
+  margin: 16px 0 4px;
+  letter-spacing: 6px;
+  cursor: pointer;
+}
+
+label {
+  display: block;
+  text-align: left;
+  font-size: 13px;
+  font-weight: bold;
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  resize: none;
+  height: 70px;
+}
+
+button {
+  width: 100%;
+  background-color: #2563EB;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}

@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vai Junto - Caronas Universitárias</title>
+
+</head>
+<body>
+    <h1>🚗 Caronas Disponíveis (Vai Junto)</h1>
+    
+        <form method="get">
+        <input type="text" name="q" placeholder="Buscar por origem..." value="{{ search_query }}">
+        <button type="submit">Buscar</button>
+        </form>
+
+    {% for rota in rotas %}
+        <div class="card">
+            <h3><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a></h3>
+            <p>Motorista: {{ rota.id_usuario.nome }}</p>
+            <p>Horário: {{ rota.horario|time:"H:i" }}</p>
+            <p>Referência: {{ rota.referencia|default:"-" }}</p>
+            <span class="badge">{{ rota.transporte }}</span>
+            <span class="badge">{{ rota.vagas }} vaga(s)</span>
+        </div>
+    {% empty %}
+        <p>Nenhuma rota encontrada.</p>
+    {% endfor %}
+</body>
+</html>

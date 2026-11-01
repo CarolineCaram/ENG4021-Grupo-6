@@ -1,0 +1,284 @@
+/* ---------- Variáveis ---------- */
+:root {
+  --azul: #1858e8;
+  --azul-escuro: #0f45c0;
+  --azul-claro: #e7eefd;
+  --verde: #78bc48;
+  --verde-claro: #e4f2da;
+  --tinta: #102040;
+  --tinta-suave: #4f5b73;
+  --fundo: #f6f8fc;
+  --branco: #ffffff;
+  --linha: #dde3ee;
+
+  --fonte-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --fonte-texto: "DM Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--fonte-texto);
+  color: var(--tinta);
+  background: var(--fundo);
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  font-family: var(--fonte-titulo);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+a { color: inherit; }
+ul, ol { list-style: none; }
+
+:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 3px;
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  display: inline-block;
+  padding: 0.8rem 1.4rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border: 2px solid transparent;
+  transition: background 0.15s, color 0.15s;
+}
+
+.botao-escuro  { background: var(--azul); color: var(--branco); }
+.botao-escuro:hover  { background: var(--azul-escuro); }
+
+.botao-amarelo { background: var(--azul); color: var(--branco); }
+.botao-amarelo:hover { background: var(--azul-escuro); }
+
+.botao-contorno { border-color: var(--tinta); color: var(--tinta); }
+.botao-contorno:hover { background: var(--tinta); color: var(--branco); }
+
+/* ---------- Topo ---------- */
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5vw;
+  border-bottom: 1px solid var(--linha);
+  background: var(--branco);
+}
+
+.logo { display: block; line-height: 0; }
+.logo img { height: 52px; width: auto; }
+
+.topo-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.link-entrar {
+  font-weight: 700;
+  text-decoration: none;
+}
+.link-entrar:hover { text-decoration: underline; }
+
+.topo-links .botao { padding: 0.55rem 1.1rem; }
+
+/* ---------- Hero ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  padding: 5rem 5vw;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-texto h1 {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 800;
+  max-width: 14em;
+}
+
+.hero-texto p {
+  margin-top: 1.4rem;
+  max-width: 34em;
+  font-size: 1.1rem;
+  color: var(--tinta-suave);
+}
+
+.hero-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+/* ---------- Bilhete (exemplo de carona) ---------- */
+.hero-visual { display: flex; justify-content: center; }
+
+.bilhete {
+  width: 100%;
+  max-width: 380px;
+  background: var(--branco);
+  border: 2px solid var(--tinta);
+  border-radius: 10px;
+  box-shadow: 8px 8px 0 var(--azul);
+  transform: rotate(-1.5deg);
+}
+
+.bilhete-topo { padding: 1.3rem 1.5rem 1rem; }
+
+.bilhete-rota {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.bilhete-rota span {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--tinta-suave);
+  margin: 0 0.2rem;
+}
+
+.bilhete-info {
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--tinta-suave);
+}
+
+.bilhete-lista {
+  padding: 0 1.5rem;
+  border-top: 2px dashed var(--linha);
+}
+
+.bilhete-lista li {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.9rem 0;
+}
+.bilhete-lista li + li { border-top: 1px solid var(--linha); }
+
+.bilhete-lista strong { display: block; font-size: 0.95rem; }
+.bilhete-lista small  { color: var(--tinta-suave); font-size: 0.8rem; }
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--verde-claro);
+  color: #3f7a1f;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.avatar-b { background: var(--azul-claro); color: var(--azul); }
+
+.bilhete-pe {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--verde-claro);
+  border-top: 2px solid var(--tinta);
+  border-radius: 0 0 8px 8px;
+}
+.bilhete-pe small  { display: block; font-size: 0.75rem; }
+.bilhete-pe strong { font-size: 1rem; }
+
+/* ---------- Motivos ---------- */
+.motivos {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 5vw;
+  border-top: 1px solid var(--linha);
+}
+
+.motivos h2 { font-size: 2rem; }
+
+.motivos-lista li { padding: 1.4rem 0; }
+.motivos-lista li:first-child { padding-top: 0; }
+.motivos-lista li + li { border-top: 1px solid var(--linha); }
+
+.motivos-lista h3 { font-size: 1.25rem; margin-bottom: 0.4rem; }
+.motivos-lista p  { color: var(--tinta-suave); max-width: 38em; }
+
+/* ---------- Passos ---------- */
+.passos {
+  padding: 4rem 5vw;
+  background: var(--azul-claro);
+}
+
+.passos h2 {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  font-size: 2rem;
+}
+
+.passos-lista {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.passos-lista li { display: flex; gap: 1rem; align-items: flex-start; }
+
+.passo-num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: var(--azul);
+  color: var(--branco);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+}
+
+/* ---------- Chamada final ---------- */
+.chamada {
+  text-align: center;
+  padding: 5rem 5vw;
+  background: var(--azul);
+  color: var(--branco);
+}
+
+.chamada h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.chamada p  { margin: 0.8rem 0 1.8rem; opacity: 0.85; }
+
+.chamada .botao-amarelo { background: var(--branco); color: var(--azul); }
+.chamada .botao-amarelo:hover { background: var(--azul-claro); }
+
+/* ---------- Rodapé ---------- */
+.rodape {
+  padding: 1.5rem 5vw;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Celular e tablet ---------- */
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; gap: 3rem; padding: 3rem 5vw; }
+  .motivos { grid-template-columns: 1fr; gap: 1.5rem; }
+  .passos-lista { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .topo-links { gap: 1rem; }
+  .hero-acoes .botao { flex: 1 1 100%; text-align: center; }
+}
