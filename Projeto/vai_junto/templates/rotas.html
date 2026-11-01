@@ -4,27 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Vai Junto - Caronas Universitárias</title>
-
+  <link rel="stylesheet" href="{% static 'css/rotas.css' %}">
 </head>
 <body>
     <h1>🚗 Caronas Disponíveis (Vai Junto)</h1>
     
-        <form method="get">
-        <input type="text" name="q" placeholder="Buscar por origem..." value="{{ search_query }}">
-        <button type="submit">Buscar</button>
-        </form>
-
     {% for rota in rotas %}
         <div class="card">
-            <h3><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a></h3>
-            <p>Motorista: {{ rota.id_usuario.nome }}</p>
-            <p>Horário: {{ rota.horario|time:"H:i" }}</p>
-            <p>Referência: {{ rota.referencia|default:"-" }}</p>
-            <span class="badge">{{ rota.transporte }}</span>
-            <span class="badge">{{ rota.vagas }} vaga(s)</span>
+            <h2>{{ rota.origem }} ➔ {{ rota.id_instituicao.sigla }}</h2>
+            <p><strong>Motorista:</strong> {{ rota.id_usuario.nome }}</p>
+            <p><strong>Horário:</strong> {{ rota.horario }}</p>
+            <p><strong>Ponto de Referência:</strong> {{ rota.referencia }}</p>
+            <p><strong>Vagas restantes:</strong> <span class="badge">{{ rota.vagas }}</span></p>
         </div>
     {% empty %}
-        <p>Nenhuma rota encontrada.</p>
+        <p>Nenhuma rota cadastrada no momento.</p>
     {% endfor %}
 </body>
 </html>
