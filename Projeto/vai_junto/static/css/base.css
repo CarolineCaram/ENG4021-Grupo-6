@@ -1,0 +1,24 @@
+:root{
+  --navy:#14215a; --navy-2:#0e1a4d; --blue:#2563eb; --blue-2:#1d4ed8;
+  --green:#22c55e; --yellow:#f4d31a; --bg:#f8fafc; --ink:#0f1b4d;
+  --muted:#64748b; --line:#e2e8f0; --card:#ffffff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3,.logo .nome{font-family:'Plus Jakarta Sans','Inter',sans-serif}
+a{color:var(--blue)}
+.logo{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.logo svg{width:26px;height:32px}
+.logo-texto{display:flex;flex-direction:column;gap:3px}
+.logo .nome{font-weight:800;font-size:19px;line-height:1;color:var(--navy);font-style:normal}
+.logo .nome i{font-style:normal;color:var(--blue)}
+.logo small{font-size:7.5px;letter-spacing:.16em;color:var(--muted);font-weight:700}
+.logo.claro .nome{color:#fff}
+.logo.claro .nome i{color:#8db1ff}
+.logo.claro small{color:#b9c8f0}
+.btn{display:inline-block;border:0;border-radius:9px;padding:11px 18px;font:600 14px 'Plus Jakarta Sans','Inter',sans-serif;cursor:pointer;text-decoration:none;text-align:center}
+.btn-azul{background:var(--blue);color:#fff;box-shadow:0 6px 14px rgba(37,99,235,.25)}
+.btn-azul:hover{background:var(--blue-2)}
+.btn-claro{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn-suave{background:#e8effd;color:var(--blue)}

@@ -12,7 +12,153 @@ body {
 .caixa {
   background-color: #ffffff;
   border: 1px solid #E2E8F0;
-  border-radius: 12px;
+  border-radius: 12px;    :root {
+      --azul: #1858e8;
+      --azul-escuro: #0f45c0;
+      --azul-claro: #e7eefd;
+      --verde: #78bc48;
+      --verde-claro: #e4f2da;
+      --tinta: #102040;
+      --tinta-suave: #4f5b73;
+      --fundo: #f6f8fc;
+      --branco: #ffffff;
+      --linha: #dde3ee;
+      --fonte-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+      --fonte-texto: "DM Sans", "Segoe UI", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--fonte-texto);
+      color: var(--tinta);
+      background: var(--fundo);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2 { font-family: var(--fonte-titulo); line-height: 1.1; letter-spacing: -0.02em; }
+    a { color: inherit; }
+
+    /* ---------- Topo (igual ao da tela inicial) ---------- */
+    .topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 5vw;
+      border-bottom: 1px solid var(--linha);
+      background: var(--branco);
+    }
+
+    .logo { display: block; line-height: 0; }
+    .logo img { height: 52px; width: auto; }
+
+    .link-entrar { font-weight: 700; text-decoration: none; }
+    .link-entrar:hover { text-decoration: underline; }
+
+    /* ---------- Área central ---------- */
+    .conteudo {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 5vw;
+    }
+
+    .caixa {
+      width: 100%;
+      max-width: 420px;
+      background: var(--branco);
+      border: 2px solid var(--tinta);
+      border-radius: 10px;
+      box-shadow: 8px 8px 0 var(--azul);
+      padding: 2.2rem 2rem;
+    }
+
+    .caixa h1 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+
+    .caixa .subtitulo {
+      color: var(--tinta-suave);
+      font-size: 0.95rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .erro {
+      background: #fde8e8;
+      border: 1px solid #f5b5b5;
+      color: #b91c1c;
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin: 0.9rem 0 0.3rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid var(--linha);
+      border-radius: 6px;
+      font-family: var(--fonte-texto);
+      font-size: 0.95rem;
+      color: var(--tinta);
+      background: var(--branco);
+    }
+
+    input:focus, select:focus {
+      outline: 3px solid var(--azul-claro);
+      border-color: var(--azul);
+    }
+
+    .botao {
+      display: block;
+      width: 100%;
+      margin-top: 1.4rem;
+      padding: 0.8rem 1.4rem;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      background: var(--azul);
+      color: var(--branco);
+      font-family: var(--fonte-texto);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .botao:hover { background: var(--azul-escuro); }
+
+    .tem-conta {
+      margin-top: 1.2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--tinta-suave);
+    }
+
+    .tem-conta a { color: var(--azul); font-weight: 700; text-decoration: none; }
+    .tem-conta a:hover { text-decoration: underline; }
+
+    /* ---------- Rodapé (igual ao da tela inicial) ---------- */
+    .rodape {
+      padding: 1.5rem 5vw;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--tinta-suave);
+    }
+  
+
   padding: 40px;
   width: 360px;
   text-align: center;
