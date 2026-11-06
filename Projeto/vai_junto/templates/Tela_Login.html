@@ -14,13 +14,13 @@
 <body>
 
   <header class="topo">
-    <a class="logo" href="Tela_Login.html">
-      <img src="logo.png" alt="Vaijunto – caronas universitárias">
+    <a class="logo" href="{% url 'home' %}">
+      <img src="{% static 'css/img/logo.png' %}" alt="Vaijunto – caronas universitárias">
     </a>
     <nav class="topo-links" aria-label="Acesso">
       <!-- Entrar e "Já tenho conta" levam ao login (Página_Inicio.html). Os botões com href="#" (Cadastrar, Encontrar carona, Criar minha conta) ainda não têm página: quando criar o cadastro, troque o "#" pelo nome dela -->
-      <a class="link-entrar" href="Página_Inicio.html">Entrar</a>
-      <a class="botao botao-escuro" href="#">Cadastrar</a>
+      <a class="link-entrar" href="{% url 'login' %}">Entrar</a>
+      <a class="botao botao-escuro" href="{% url 'cadastro' %}">Cadastrar</a>
     </nav>
   </header>
 
@@ -35,8 +35,8 @@
           conferida.
         </p>
         <div class="hero-acoes">
-          <a class="botao botao-amarelo" href="#">Encontrar carona</a>
-          <a class="botao botao-contorno" href="Página_Inicio.html">Já tenho conta</a>
+          <a class="botao botao-amarelo" href="{% url 'cadastro' %}">Encontrar carona</a>
+          <a class="botao botao-contorno" href="{% url 'login' %}">Já tenho conta</a>
         </div>
       </div>
 
@@ -121,7 +121,7 @@
     <section class="chamada">
       <h2>Vai pra faculdade amanhã?</h2>
       <p>Cadastre-se e veja quem sai perto de você.</p>
-      <a class="botao botao-amarelo" href="#">Criar minha conta</a>
+      <a class="botao botao-amarelo" href="{% url 'cadastro' %}">Criar minha conta</a>
     </section>
 
   </main>

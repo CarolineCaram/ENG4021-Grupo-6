@@ -3,117 +3,251 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>vaijunto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Criar conta · vaijunto</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #F8FAFC;
-      color: #172554;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-
-    .caixa {
-      background-color: #ffffff;
-      border: 1px solid #E2E8F0;
-      border-radius: 12px;
-      padding: 40px;
-      width: 360px;
-      text-align: center;
-    }
-
-    h2 {
-      color: #2563EB;
-      margin-bottom: 4px;
-    }
-
-    h1 {
-      font-size: 20px;
-      margin-top: 0;
-    }
-
-    p {
-      color: #64748B;
-      font-size: 14px;
-    }
-
-    label {
-      display: block;
-      text-align: left;
-      font-size: 13px;
-      font-weight: bold;
-      margin-top: 16px;
-      margin-bottom: 4px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-
-    button {
-      width: 100%;
-      background-color: #2563EB;
-      color: #ffffff;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 15px;
-      margin-top: 24px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #1d4ed8;
-    }
-
-    a {
-      color: #2563EB;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/cadastro.css' %}">
 </head>
 
 <body>
+  <div class="layout">
 
-  <div class="caixa">
-    <h2>vaijunto</h2>
-    <h1>Criar sua conta</h1>
-    <p>Cadastre-se para encontrar e oferecer caronas com estudantes da sua faculdade.</p>
+  
+    <aside class="painel">
+      <a class="logo" href="/">
+        <span class="logo-icone">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="14" rx="3"/><path d="M17 12h4"/></svg>
+        </span>
+        vaijunto
+      </a>
 
-    <label>Nome completo</label>
-    <input type="text" placeholder="Seu nome">
+      <div class="painel-conteudo">
 
-    <label>E-mail institucional</label>
-    <input type="email" placeholder="seu@email.com">
+        <div class="painel-etapa ativo" data-painel="1">
+          <h2>Bem-vindo à sua comunidade de caronas</h2>
+          <p class="painel-texto">Estudantes economizam tempo e dinheiro compartilhando o caminho até a faculdade.</p>
+          <ul class="lista-check">
+            <li>Matrícula verificada para segurança</li>
+            <li>Rotas compatíveis encontradas automaticamente</li>
+            <li>Comunidade exclusivamente universitária</li>
+          </ul>
+        </div>
 
-    <label>Universidade</label>
-    <select>
-      <option>Selecione sua universidade</option>
-      <option>PUC-Rio</option>
-      <option>UFF</option>
-      <option>UFRJ</option>
-      <option>Outra</option>
-    </select>
+        <div class="painel-etapa" data-painel="2">
+          <span class="painel-icone">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </span>
+          <h2>Sua segurança é prioridade</h2>
+          <p class="painel-texto">Verificamos a matrícula de todos os usuários para garantir que apenas estudantes reais tenham acesso à plataforma.</p>
+          <div class="painel-card">
+            <strong>🔒 Seus dados são protegidos</strong>
+            <span>As informações de matrícula são usadas apenas para verificação e nunca compartilhadas com terceiros.</span>
+          </div>
+        </div>
 
-    <label>Curso</label>
-    <input type="text" placeholder="Seu curso">
+        <div class="painel-etapa" data-painel="3">
+          <span class="painel-icone">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          </span>
+          <h2>Encontre quem faz o seu caminho</h2>
+          <p class="painel-texto">Com seu ponto de origem e horário, ligamos você a estudantes com rotas parecidas até a faculdade.</p>
+          <div class="painel-card">
+            <strong>📍 Você controla o que aparece</strong>
+            <span>Outros estudantes veem apenas o bairro e o horário, nunca o endereço completo.</span>
+          </div>
+        </div>
 
-    <label>Senha</label>
-    <input type="password" placeholder="Crie uma senha">
+ 
+        <div class="painel-etapa" data-painel="4">
+          <span class="painel-icone">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>
+          </span>
+          <h2>Quase lá!</h2>
+          <p class="painel-texto">Conte como você vai até a faculdade. Se tiver vagas sobrando, outros estudantes poderão pedir carona.</p>
+          <ul class="lista-check">
+            <li>Você pode editar rota e horários depois</li>
+            <li>Participe de grupos por rota</li>
+          </ul>
+        </div>
 
-    <button>Cadastrar</button>
+      </div>
 
-    <p>Já tem conta? <a href="login.html">Entrar</a></p>
+      <p class="copy">© 2026 vaijunto</p>
+    </aside>
+
+
+    <main class="area-form">
+      <div class="form-wrap">
+
+        <div class="stepper" aria-hidden="true">
+          <span class="barra ativa"></span>
+          <span class="barra"></span>
+          <span class="barra"></span>
+          <span class="barra"></span>
+        </div>
+
+        {% if erro %}
+          <div class="alerta-erro" role="alert">{{ erro }}</div>
+        {% endif %}
+
+        <form method="post" id="form-cadastro" novalidate>
+          {% csrf_token %}
+
+    
+          <section class="etapa ativa" data-etapa="1">
+            <h1>Criar conta</h1>
+            <p class="sub">Etapa 1 de 4 · Dados de acesso</p>
+
+            <label for="nome">Nome completo</label>
+            <input id="nome" type="text" name="nome" placeholder="Ex: Maria Souza" value="{{ dados.nome }}" required>
+
+            <label for="email">E-mail universitário ou pessoal</label>
+            <input id="email" type="email" name="email" placeholder="Ex: maria@email.com" value="{{ dados.email }}" required>
+
+            <label for="senha">Senha</label>
+            <input id="senha" type="password" name="senha" placeholder="Mínimo 8 caracteres" minlength="8" required>
+
+            <label for="confirmar">Confirmar senha</label>
+            <input id="confirmar" type="password" name="confirmar" placeholder="Repita a senha" required>
+
+            <p class="msg-erro" id="msg-senha" hidden>As senhas não coincidem.</p>
+
+            <button type="button" class="btn btn-primario" data-acao="proxima">Continuar →</button>
+            <p class="rodape-form">Já tem conta? <a href="{% url 'login' %}">Entrar</a></p>
+          </section>
+
+          <section class="etapa" data-etapa="2">
+            <h1>Confirmar matrícula</h1>
+            <p class="sub">Etapa 2 de 4 · Verificação institucional</p>
+
+            <label for="instituicao">Instituição de ensino</label>
+            <select id="instituicao" name="instituicao" required>
+              <option value="">Selecione sua faculdade</option>
+              {% for i in instituicoes %}
+                <option value="{{ i.id_instituicao }}" {% if dados.instituicao == i.id_instituicao|stringformat:"s" %}selected{% endif %}>{{ i.sigla }} - {{ i.nome }}</option>
+              {% endfor %}
+            </select>
+
+            <label for="matricula">Número de matrícula</label>
+            <input id="matricula" type="text" name="matricula" placeholder="Ex: 2023100456" value="{{ dados.matricula }}" required>
+
+            <div class="aviso">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2L1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg>
+              <p>Suas informações serão usadas <strong>apenas para verificação de matrícula.</strong> Não armazenamos dados sensíveis além do necessário para confirmar seu vínculo acadêmico.</p>
+            </div>
+
+            <button type="button" class="btn btn-primario" data-acao="proxima">Verificar matrícula</button>
+            <button type="button" class="btn btn-voltar" data-acao="voltar">← Voltar</button>
+          </section>
+
+  
+          <section class="etapa" data-etapa="3">
+            <h1>Sua rota</h1>
+            <p class="sub">Etapa 3 de 4 · Origem e horário</p>
+
+            <label for="origem">Ponto de origem</label>
+            <input id="origem" type="text" name="origem" placeholder="Seu bairro" value="{{ dados.origem }}" required>
+
+            <label for="referencia">Endereço ou referência <span class="opcional">(opcional)</span></label>
+            <input id="referencia" type="text" name="referencia" placeholder="Ex: Próximo ao metrô" value="{{ dados.referencia }}">
+
+            <label for="horario">Horário de saída</label>
+            <input id="horario" type="time" name="horario" value="{{ dados.horario }}" required>
+
+            <button type="button" class="btn btn-primario" data-acao="proxima">Continuar →</button>
+            <button type="button" class="btn btn-voltar" data-acao="voltar">← Voltar</button>
+          </section>
+
+  
+          <section class="etapa" data-etapa="4">
+            <h1>Como você vai?</h1>
+            <p class="sub">Etapa 4 de 4 · Meio de transporte</p>
+
+            <label for="transporte">Meio de transporte</label>
+            <select id="transporte" name="transporte">
+              <option value="Carro" {% if dados.transporte == "Carro" %}selected{% endif %}>Carro</option>
+              <option value="Moto" {% if dados.transporte == "Moto" %}selected{% endif %}>Moto</option>
+              <option value="Passageiro" {% if dados.transporte == "Passageiro" %}selected{% endif %}>Passageiro</option>
+              <option value="Van" {% if dados.transporte == "Van" %}selected{% endif %}>Van / Micro-ônibus</option>
+              <option value="Bicicleta" {% if dados.transporte == "Bicicleta" %}selected{% endif %}>Bicicleta</option>
+            </select>
+
+            <div id="grupo-vagas">
+              <label for="vagas">Vagas disponíveis</label>
+              <input id="vagas" type="number" name="vagas" min="0" max="8" value="{{ dados.vagas|default:2 }}">
+            </div>
+
+            <button type="submit" class="btn btn-primario">Criar conta</button>
+            <button type="button" class="btn btn-voltar" data-acao="voltar">← Voltar</button>
+          </section>
+
+        </form>
+      </div>
+    </main>
   </div>
 
+  <script>
+    (function () {
+      const form = document.getElementById('form-cadastro');
+      const etapas = form.querySelectorAll('.etapa');
+      const paineis = document.querySelectorAll('.painel-etapa');
+      const barras = document.querySelectorAll('.stepper .barra');
+      const senha = document.getElementById('senha');
+      const confirmar = document.getElementById('confirmar');
+      const msgSenha = document.getElementById('msg-senha');
+      const transporte = document.getElementById('transporte');
+      const grupoVagas = document.getElementById('grupo-vagas');
+      const vagas = document.getElementById('vagas');
+      let atual = 1;
+
+      function mostrar(n) {
+        atual = n;
+        etapas.forEach(e => e.classList.toggle('ativa', +e.dataset.etapa === n));
+        paineis.forEach(p => p.classList.toggle('ativo', +p.dataset.painel === n));
+        barras.forEach((b, i) => b.classList.toggle('ativa', i < n));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function etapaValida(n) {
+        const secao = form.querySelector('[data-etapa="' + n + '"]');
+        for (const campo of secao.querySelectorAll('input, select')) {
+          if (!campo.checkValidity()) { campo.reportValidity(); return false; }
+        }
+        if (n === 1 && senha.value !== confirmar.value) {
+          msgSenha.hidden = false;
+          confirmar.focus();
+          return false;
+        }
+        msgSenha.hidden = true;
+        return true;
+      }
+
+      form.addEventListener('click', function (ev) {
+        const btn = ev.target.closest('[data-acao]');
+        if (!btn) return;
+        if (btn.dataset.acao === 'proxima' && etapaValida(atual)) mostrar(atual + 1);
+        if (btn.dataset.acao === 'voltar') mostrar(atual - 1);
+      });
+
+      form.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' && atual < 4 && ev.target.tagName !== 'BUTTON') {
+          ev.preventDefault();
+          if (etapaValida(atual)) mostrar(atual + 1);
+        }
+      });
+
+
+      function ajustarVagas() {
+        const passageiro = transporte.value === 'Passageiro';
+        grupoVagas.hidden = passageiro;
+        if (passageiro) vagas.value = 0;
+      }
+      transporte.addEventListener('change', ajustarVagas);
+      ajustarVagas();
+    })();
+  </script>
 </body>
 </html>

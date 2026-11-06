@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #172554;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 30px 0;
+    }
+
+    .caixa {
+      background-color: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 32px;
+      width: 400px;
+    }
+
+    h2 {
+      color: #2563EB;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .descricao {
+      color: #64748B;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .aluno {
+      display: flex;
+      align-items: center;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .foto {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: #2563EB;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+
+    .info {
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .info .nome {
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .info .detalhe {
+      font-size: 12px;
+      color: #64748B;
+    }
+
+    .verificado {
+      color: #22C55E;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .btn-contato {
+      background-color: #2563EB;
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-contato:hover {
+      background-color: #1d4ed8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+    <h2>vaijunto</h2>
+    <h1>Grupo da sua rota</h1>
+    <p class="descricao">Estudantes da sua faculdade com trajetos compatíveis com o seu.</p>
+
+    <div class="aluno">
+      <div class="foto">LM</div>
+      <div class="info">
+        <div class="nome">Lucas Mendes</div>
+        <div class="detalhe">Engenharia · Vila Madalena</div>
+        <div class="verificado">Matrícula verificada</div>
+      </div>
+      <button class="btn-contato">Contatar</button>
+    </div>
+
+    <div class="aluno">
+      <div class="foto">AF</div>
+      <div class="info">
+        <div class="nome">Ana Ferreira</div>
+        <div class="detalhe">Direito · Pinheiros</div>
+        <div class="verificado">Matrícula verificada</div>
+      </div>
+      <button class="btn-contato">Contatar</button>
+    </div>
+
+    <div class="aluno">
+      <div class="foto">RS</div>
+      <div class="info">
+        <div class="nome">Rafael Souza</div>
+        <div class="detalhe">Administração · Perdizes</div>
+        <div class="verificado">Matrícula verificada</div>
+      </div>
+      <button class="btn-contato">Contatar</button>
+    </div>
+
+    <div class="aluno">
+      <div class="foto">CM</div>
+      <div class="info">
+        <div class="nome">Carla Martins</div>
+        <div class="detalhe">Psicologia · Butantã</div>
+        <div class="verificado">Matrícula verificada</div>
+      </div>
+      <button class="btn-contato">Contatar</button>
+    </div>
+
+  </div>
+
+</body>
+</html>

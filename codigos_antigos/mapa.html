@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa e Rotas - Carona Universitária</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+    
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mapa de Rotas</h1>
+        <nav>
+            <a href="index.html">Voltar ao Início</a>
+        </nav>
+    </header>
+
+    <main>
+        <div style="padding: 20px;">
+            <label for="autocomplete">Digite o seu endereço:</label>
+            <input type="text" id="autocomplete" placeholder="Ex: Av. Principal, 1000" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <div id="map"></div>
+    </main>
+
+    <script src="../js/map.js"></script>
+ 
+    <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_DE_API&libraries=places&callback=initMap" async defer></script>
+</body>
+</html>

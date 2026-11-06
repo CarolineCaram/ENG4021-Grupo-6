@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #172554;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .caixa {
+      background-color: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 40px;
+      width: 360px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #2563EB;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-top: 0;
+    }
+
+    p {
+      color: #64748B;
+      font-size: 14px;
+    }
+
+    .aviso {
+      background-color: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      color: #172554;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 4px;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .btn-remover {
+      width: 100%;
+      background-color: #DC2626;
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      margin-top: 24px;
+      cursor: pointer;
+    }
+
+    .btn-remover:hover {
+      background-color: #b91c1c;
+    }
+
+    .btn-cancelar {
+      width: 100%;
+      background-color: #ffffff;
+      color: #172554;
+      border: 1px solid #E2E8F0;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .btn-cancelar:hover {
+      background-color: #F8FAFC;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+    <h2>vaijunto</h2>
+    <h1>Remover conta</h1>
+    <p>Sentimos muito que você queira sair. Esta ação é permanente e não pode ser desfeita.</p>
+
+    <div class="aviso">
+      Ao remover sua conta, seu perfil, suas rotas e seu histórico de caronas serão apagados definitivamente.
+    </div>
+
+    <label>Confirme sua senha</label>
+    <input type="password" placeholder="Digite sua senha">
+
+    <label>
+      <input type="checkbox"> Entendo que esta ação é irreversível
+    </label>
+
+    <button class="btn-remover">Remover minha conta</button>
+    <button class="btn-cancelar">Cancelar</button>
+  </div>
+
+</body>
+</html>
