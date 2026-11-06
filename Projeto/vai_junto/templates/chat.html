@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #172554;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .caixa {
+      background-color: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      width: 380px;
+      overflow: hidden;
+    }
+
+    .topo {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .foto {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: #2563EB;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+
+    .topo .nome {
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .topo .status {
+      font-size: 12px;
+      color: #22C55E;
+    }
+
+    .conversa {
+      padding: 16px;
+      background-color: #F8FAFC;
+      height: 320px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .recebida {
+      background-color: #E2E8F0;
+      color: #172554;
+      border-top-left-radius: 2px;
+    }
+
+    .enviada {
+      background-color: #2563EB;
+      color: #ffffff;
+      margin-left: auto;
+      border-top-right-radius: 2px;
+    }
+
+    .hora {
+      display: block;
+      font-size: 10px;
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+
+    .digitar {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    .digitar input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #E2E8F0;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .digitar button {
+      background-color: #2563EB;
+      color: #ffffff;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      margin-left: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .digitar button:hover {
+      background-color: #1d4ed8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+    <div class="topo">
+      <div class="foto">LM</div>
+      <div>
+        <div class="nome">Lucas Mendes</div>
+        <div class="status">online</div>
+      </div>
+    </div>
+
+    <div class="conversa">
+      <div class="msg recebida">
+        Oi! Vi que você vai pra PUC amanhã de manhã, posso pegar carona?
+        <span class="hora">08:12</span>
+      </div>
+
+      <div class="msg enviada">
+        Oi! Posso sim, saio às 7h30 de Botafogo.
+        <span class="hora">08:14</span>
+      </div>
+
+      <div class="msg recebida">
+        Perfeito! Onde a gente se encontra?
+        <span class="hora">08:15</span>
+      </div>
+
+      <div class="msg enviada">
+        Pode ser na frente do metrô. Te mando a localização.
+        <span class="hora">08:16</span>
+      </div>
+    </div>
+
+    <div class="digitar">
+      <input type="text" placeholder="Digite uma mensagem...">
+      <button>Enviar</button>
+    </div>
+  </div>
+
+</body>
+</html>
