@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #172554;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 30px 0;
+    }
+
+    .caixa {
+      background-color: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 32px;
+      width: 400px;
+    }
+
+    h2 {
+      color: #2563EB;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-top: 0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .secao {
+      font-size: 14px;
+      font-weight: bold;
+      color: #64748B;
+      margin: 18px 0 10px;
+    }
+
+    .carona {
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .carona .rota {
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .carona .info {
+      font-size: 13px;
+      color: #64748B;
+      margin-top: 4px;
+    }
+
+    .status {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+
+    .agendada {
+      background-color: #DBEAFE;
+      color: #2563EB;
+    }
+
+    .concluida {
+      background-color: #DCFCE7;
+      color: #16A34A;
+    }
+
+    .estrelas {
+      color: #FACC15;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+    <h2>vaijunto</h2>
+    <h1>Minhas caronas</h1>
+
+    <div class="secao">Próximas caronas</div>
+
+    <div class="carona">
+      <div class="rota">Botafogo → PUC-Rio</div>
+      <div class="info">Amanhã, 07h30 · com Lucas Mendes</div>
+      <span class="status agendada">Agendada</span>
+    </div>
+
+    <div class="secao">Caronas anteriores</div>
+
+    <div class="carona">
+      <div class="rota">Copacabana → PUC-Rio</div>
+      <div class="info">05/11, 07h45 · com Ana Ferreira</div>
+      <span class="status concluida">Concluída</span>
+      <div class="info"><span class="estrelas">★ ★ ★ ★ ★</span></div>
+    </div>
+
+    <div class="carona">
+      <div class="rota">Recreio → PUC-Rio</div>
+      <div class="info">03/11, 08h00 · com Rafael Souza</div>
+      <span class="status concluida">Concluída</span>
+      <div class="info"><span class="estrelas">★ ★ ★ ★ ☆</span></div>
+    </div>
+
+  </div>
+
+</body>
+</html>
