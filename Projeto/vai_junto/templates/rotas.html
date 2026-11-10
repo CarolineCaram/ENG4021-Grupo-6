@@ -3,20 +3,37 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Vai Junto - Caronas Universitárias</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/rotas.css' %}">
 </head>
 <body>
-    <h1>🚗 Caronas Disponíveis (Vai Junto)</h1>
+    <header>
+      <a href="{% url 'home' %}">vaijunto</a>
+      <nav>
+        <a href="{% url 'oferecer_carona' %}">Oferecer carona</a>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit">Sair</button>
+        </form>
+      </nav>
+    </header>
+    <h1>Caronas disponíveis</h1>
+    <form method="get" role="search">
+      <label for="q">Buscar por origem</label>
+      <input id="q" type="search" name="q" value="{{ search_query }}" placeholder="Ex.: Centro">
+      <button type="submit">Buscar</button>
+    </form>
     
     {% for rota in rotas %}
-        <div class="card">
-            <h2>{{ rota.origem }} ➔ {{ rota.id_instituicao.sigla }}</h2>
+        <article class="card">
+            <h2><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a></h2>
             <p><strong>Motorista:</strong> {{ rota.id_usuario.nome }}</p>
             <p><strong>Horário:</strong> {{ rota.horario }}</p>
             <p><strong>Ponto de Referência:</strong> {{ rota.referencia }}</p>
-            <p><strong>Vagas restantes:</strong> <span class="badge">{{ rota.vagas }}</span></p>
-        </div>
+            <p><strong>Vagas disponíveis:</strong> <span class="badge">{{ rota.vagas }}</span></p>
+        </article>
     {% empty %}
         <p>Nenhuma rota cadastrada no momento.</p>
     {% endfor %}

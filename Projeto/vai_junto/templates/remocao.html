@@ -1,10 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>vaijunto</title>
-
-  <link rel="stylesheet" href="css/remocao.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/remocao.css' %}">
 </head>
 
 <body>
@@ -13,20 +15,19 @@
     <h2>vaijunto</h2>
     <h1>Remover conta</h1>
     <p>Sentimos muito que você queira sair. Esta ação é permanente e não pode ser desfeita.</p>
+    {% if erro %}<p class="erro" role="alert">{{ erro }}</p>{% endif %}
 
     <div class="aviso">
       Ao remover sua conta, seu perfil, suas rotas e seu histórico de caronas serão apagados definitivamente.
     </div>
 
-    <label>Confirme sua senha</label>
-    <input type="password" placeholder="Digite sua senha">
-
-    <label>
-      <input type="checkbox"> Entendo que esta ação é irreversível
-    </label>
-
-    <button class="btn-remover">Remover minha conta</button>
-    <button class="btn-cancelar">Cancelar</button>
+    <form method="post">
+      {% csrf_token %}
+      <label for="confirmacao">Digite REMOVER para confirmar</label>
+      <input id="confirmacao" name="confirmacao" type="text" required>
+      <button class="btn-remover" type="submit">Remover conta</button>
+    </form>
+    <a class="btn-cancelar" href="{% url 'usuarios' %}">Cancelar</a>
   </div>
 
 </body>

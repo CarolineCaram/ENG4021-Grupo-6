@@ -79,6 +79,5 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background-color: #1d4ed8;
-}
+.caixa>p{padding:12px 14px;border-radius:9px;background:#f8fafc}
+.caixa>p strong{color:var(--navy)}

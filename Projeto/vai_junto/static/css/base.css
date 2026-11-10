@@ -5,9 +5,41 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+body{margin:0;font-family:'DM Sans','Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55}
 h1,h2,h3,.logo .nome{font-family:'Plus Jakarta Sans','Inter',sans-serif}
-a{color:var(--blue)}
+a{color:var(--blue);text-underline-offset:3px}
+a:hover{color:var(--blue-2)}
+button,input,select,textarea{font:inherit}
+input,select,textarea{max-width:100%;color:var(--ink)}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(37,99,235,.35);outline-offset:2px}
+img{max-width:100%;height:auto}
+.caixa{width:min(100% - 32px,560px);margin:48px auto;padding:clamp(24px,5vw,40px);background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(20,33,90,.08)}
+.caixa h1{margin:.25rem 0 .75rem;color:var(--navy);font-size:clamp(1.5rem,4vw,2rem);line-height:1.2}
+.caixa h2{color:var(--blue);font-size:1.1rem}
+.caixa p{color:var(--muted)}
+.caixa label{display:block;margin:14px 0 6px;font-size:.9rem;font-weight:700;color:#334155}
+.caixa input,.caixa select,.caixa textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.caixa textarea{min-height:110px;resize:vertical}
+.caixa button,.caixa .botao,.caixa a.botao{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin-top:18px;padding:10px 18px;border:0;border-radius:9px;background:var(--blue);color:#fff;font-weight:700;text-decoration:none}
+.caixa button:hover,.caixa .botao:hover{background:var(--blue-2);color:#fff}
+.caixa form button{width:100%}
+.erro{padding:10px 12px;border:1px solid #fecaca;border-radius:9px;background:#fef2f2;color:#991b1b!important}
+.tabela-wrap{overflow-x:auto}
+.vazio{padding:24px;border:1px dashed var(--line);border-radius:12px;text-align:center}
+.card{padding:22px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(20,33,90,.06)}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;background:#e8effd;color:var(--blue);font-size:.85rem;font-weight:700}
+.aluno{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.aluno+.aluno{margin-top:10px}
+.aluno .nome{font-weight:700}
+.dado{margin:14px 0;padding:14px;border-radius:10px;background:#f8fafc}
+.titulo{color:var(--muted);font-size:.85rem}
+.valor{font-weight:700}
+.btn-cancelar{display:inline-block;margin-top:12px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topo-links,nav{display:flex;align-items:center;gap:14px}
+.busca-mapa{width:min(100% - 32px,760px);margin:48px auto;padding:clamp(24px,5vw,40px);border:1px solid var(--line);border-radius:18px;background:#fff}
+@media(max-width:600px){.caixa{margin:20px auto}.topo{align-items:flex-start;flex-direction:column}.topo-links,nav{flex-wrap:wrap}}
 .logo{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .logo svg{width:26px;height:32px}
 .logo-texto{display:flex;flex-direction:column;gap:3px}

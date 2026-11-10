@@ -31,3 +31,12 @@ button {
 }
 button:hover { background-color: #1d4ed8; }
 button:disabled { background-color: #93B4F5; cursor: not-allowed; }
+body{min-height:100vh;display:grid;grid-template-columns:minmax(280px,40%) 1fr;background:#f8fafc}
+.esquerda{display:flex;flex-direction:column;justify-content:space-between;padding:clamp(28px,6vw,72px);background:var(--navy);color:#fff}
+.esquerda b{font-size:1.4rem}
+.esquerda h1{line-height:1.2}
+.esquerda p,.copyright{color:#cbd5e1}
+.direita{display:grid;place-items:center;padding:24px}
+.caixa{width:min(100%,560px);margin:0}
+.caixa>a{display:inline-flex;margin:12px 12px 0 0;padding:10px 15px;border-radius:9px;background:var(--blue);color:#fff;font-weight:700;text-decoration:none}
+@media(max-width:760px){body{grid-template-columns:1fr}.esquerda{gap:28px;padding:26px}.direita{padding:18px}}

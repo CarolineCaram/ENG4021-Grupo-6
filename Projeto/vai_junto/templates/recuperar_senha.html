@@ -5,28 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reportar problema</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/recuperar_senha.css' %}">
 </head>
 <body>
   <main>
-    <h1>Reportar problema</h1>
-
-    <form method="post" action="">
-      {% csrf_token %}
-
-      <label for="tipo">Tipo de problema</label>
-      <select id="tipo" name="tipo" required>
-        <option value="">Selecione</option>
-        <option value="comportamento">Comportamento inadequado</option>
-        <option value="nao_realizada">Carona não realizada</option>
-        <option value="erro_app">Erro no app</option>
-      </select>
-
-      <label for="descricao">Descrição</label>
-      <textarea id="descricao" name="descricao" rows="5" required></textarea>
-
-      <button type="submit">Enviar</button>
-    </form>
+    <h1>Recuperar senha</h1>
+    <p>A recuperação automática ainda não está disponível. Entre em contato com o suporte para redefinir o acesso à sua conta.</p>
+    <p><a href="{% url 'login' %}">Voltar para entrar</a></p>
   </main>
 </body>
 </html>

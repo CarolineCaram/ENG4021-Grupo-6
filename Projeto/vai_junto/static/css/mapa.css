@@ -1,5 +1,8 @@
-#map {
-    height: 500px;
-    width: 100%;
-    margin-top: 20px;
-}
+body{min-height:100vh;background:linear-gradient(145deg,#edf3ff,#f8fafc 55%)}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px clamp(18px,5vw,64px);background:#fff;border-bottom:1px solid var(--line)}
+header h1{margin:0;color:var(--navy);font-size:1.3rem}
+.busca-mapa h2{margin-top:0;color:var(--navy)}
+.busca-mapa form{display:grid;gap:10px}
+.busca-mapa label{font-weight:700}
+.busca-mapa input{padding:12px;border:1px solid var(--line);border-radius:9px}
+.busca-mapa button{padding:12px;border:0;border-radius:9px;background:var(--blue);color:#fff;font-weight:700}

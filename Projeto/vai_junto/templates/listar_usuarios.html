@@ -5,13 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Usuários</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/listar_usuarios.css' %}">
 </head>
 <body>
   <main class="pagina">
     <header class="topo">
       <h1>Usuários</h1>
-      <a class="botao botao-primario" href="{% url 'registrar_usuario' %}">Novo usuário</a>
+      <a class="botao botao-primario" href="{% url 'cadastro' %}">Novo usuário</a>
     </header>
 
     {% if usuarios %}
@@ -20,7 +21,6 @@
         <thead>
           <tr>
             <th>Nome</th>
-            <th>Username</th>
             <th>E-mail</th>
             <th class="col-acoes">Ações</th>
           </tr>
@@ -29,11 +29,10 @@
           {% for usuario in usuarios %}
           <tr>
             <td data-label="Nome">{{ usuario.nome }}</td>
-            <td data-label="Username">{{ usuario.username }}</td>
             <td data-label="E-mail">{{ usuario.email }}</td>
             <td data-label="Ações" class="col-acoes">
-              <a class="botao botao-secundario" href="{% url 'editar_usuario' usuario.id %}">Editar</a>
-              <a class="botao botao-perigo" href="{% url 'remover_usuario' usuario.id %}">Remover</a>
+              <a class="botao botao-secundario" href="{% url 'perfil' usuario.id_usuario %}">Perfil</a>
+              <a class="botao botao-perigo" href="{% url 'usuario_remover' usuario.id_usuario %}">Remover</a>
             </td>
           </tr>
           {% endfor %}
@@ -43,7 +42,7 @@
     {% else %}
     <div class="vazio">
       <p>Nenhum usuário cadastrado ainda.</p>
-      <a class="botao botao-primario" href="{% url 'registrar_usuario' %}">Cadastrar o primeiro usuário</a>
+      <a class="botao botao-primario" href="{% url 'cadastro' %}">Cadastrar o primeiro usuário</a>
     </div>
     {% endif %}
   </main>

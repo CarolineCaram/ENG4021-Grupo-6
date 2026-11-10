@@ -1,10 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>vaijunto</title>
 
-  <link rel="stylesheet" href="css/verificacao.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/verificacao.css' %}">
 </head>
 
 <body>
@@ -14,22 +16,8 @@
     <h1>Verificação de matrícula</h1>
     <p>Confirme seu vínculo com a universidade para garantir a segurança da comunidade.</p>
 
-    <label>Universidade</label>
-    <select>
-      <option>Selecione sua universidade</option>
-      <option>PUC-Rio</option>
-      <option>UFF</option>
-      <option>UFRJ</option>
-      <option>Outra</option>
-    </select>
-
-    <label>Número de matrícula (RA)</label>
-    <input type="text" placeholder="Ex.: 2510227">
-
-    <label>CPF</label>
-    <input type="text" placeholder="000.000.000-00">
-
-    <button>Verificar matrícula</button>
+    <p>A matrícula é informada durante a criação da conta e fica associada ao seu perfil.</p>
+    <a class="botao" href="{% url 'cadastro' %}">Criar conta</a>
   </div>
 
 </body>

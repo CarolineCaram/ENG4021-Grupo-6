@@ -1,9 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>vaijunto - meio de transporte</title>
-  <link rel="stylesheet" href="css/cadastromeiotransporte.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/cadastromeiotransporte.css' %}">
 </head>
 <body>
 
@@ -23,46 +26,11 @@
       <h2>Meio de transporte</h2>
       <p class="etapa">Etapa 4 de 4 · Quase pronto!</p>
 
-      <label class="opcao">
-        <div class="icone">🚗</div>
-        <div class="info"><b>Carro</b><span>Ofereço carona no meu carro</span></div>
-        <input type="radio" name="transporte" onclick="liberar()">
-      </label>
-
-      <label class="opcao">
-        <div class="icone">🏍️</div>
-        <div class="info"><b>Moto</b><span>Ofereço carona de moto (1 passageiro)</span></div>
-        <input type="radio" name="transporte" onclick="liberar()">
-      </label>
-
-      <label class="opcao">
-        <div class="icone">🙋</div>
-        <div class="info"><b>Passageiro</b><span>Estou procurando uma carona</span></div>
-        <input type="radio" name="transporte" onclick="liberar()">
-      </label>
-
-      <label class="opcao">
-        <div class="icone">🚐</div>
-        <div class="info"><b>Van / Micro-ônibus</b><span>Ofereço transporte em van</span></div>
-        <input type="radio" name="transporte" onclick="liberar()">
-      </label>
-
-      <label class="opcao">
-        <div class="icone">🚲</div>
-        <div class="info"><b>Bicicleta</b><span>Vou de bicicleta e busco companhia</span></div>
-        <input type="radio" name="transporte" onclick="liberar()">
-      </label>
-
-      <button id="botao" disabled>Selecione uma opção</button>
+      <p>Escolha o transporte durante o cadastro da sua conta ou ao publicar uma nova rota.</p>
+      <a href="{% url 'cadastro' %}">Criar conta</a>
+      <a href="{% url 'oferecer_carona' %}">Publicar rota</a>
     </div>
   </div>
-
-  <script>
-    function liberar() {
-      document.getElementById("botao").disabled = false;
-      document.getElementById("botao").innerText = "Continuar";
-    }
-  </script>
 
 </body>
 </html>

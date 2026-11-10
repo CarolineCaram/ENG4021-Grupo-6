@@ -67,7 +67,59 @@ def cadastro_meio_transporte(request):
     return render(request, 'cadastromeiotransporte.html')
 
 def oferecer_carona(request):
-    return render(request, 'OferecerCarona.html')
+    usuario = usuario_logado(request)
+    if not usuario:
+        return redirect('login')
+
+    erro = None
+    if request.method == 'POST':
+        dados = request.POST
+        origem = dados.get('origem', '').strip()
+        instituicao_id = dados.get('instituicao', '')
+        horario_texto = dados.get('horario', '')
+        vagas_texto = dados.get('vagas', '')
+        instituicao = (
+            Instituicao.objects.filter(pk=instituicao_id).first()
+            if instituicao_id.isdigit() else None
+        )
+
+        try:
+            horario = datetime.strptime(horario_texto, '%H:%M').time()
+        except ValueError:
+            horario = None
+
+        try:
+            vagas = int(vagas_texto)
+        except (TypeError, ValueError):
+            vagas = 0
+
+        if not origem:
+            erro = 'Informe o ponto de origem.'
+        elif not instituicao:
+            erro = 'Selecione uma instituição válida.'
+        elif not horario:
+            erro = 'Informe um horário válido.'
+        elif not 1 <= vagas <= 8:
+            erro = 'Informe entre 1 e 8 vagas.'
+        elif dados.get('transporte') not in {'Carro', 'Moto', 'Van'}:
+            erro = 'Selecione um meio de transporte válido.'
+        else:
+            Rota.objects.create(
+                id_usuario=usuario,
+                id_instituicao=instituicao,
+                origem=origem,
+                referencia=dados.get('referencia', '').strip() or None,
+                horario=horario,
+                transporte=dados.get('transporte', 'Carro'),
+                vagas=vagas,
+            )
+            return redirect('rotas')
+
+    return render(request, 'OferecerCarona.html', {
+        'erro': erro,
+        'dados': request.POST,
+        'instituicoes': Instituicao.objects.all(),
+    })
 
 
 def cadastro(request):
@@ -151,8 +203,13 @@ def usuario_remover(request, usuario_id):
     '''GET mostra a confirmação. POST apaga o usuário.'''
     usuario = get_object_or_404(Usuario, id_usuario=usuario_id)
     if request.method == 'POST':
-        usuario.delete()
-        return redirect('usuarios')
+        if request.POST.get('confirmacao', '').strip() == 'REMOVER':
+            usuario.delete()
+            return redirect('usuarios')
+        return render(request, 'remocao.html', {
+            'usuario': usuario,
+            'erro': 'Digite REMOVER para confirmar a exclusão.',
+        })
     return render(request, 'remocao.html', {'usuario': usuario})
 
 
