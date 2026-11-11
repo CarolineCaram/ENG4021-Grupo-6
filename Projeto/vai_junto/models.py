@@ -55,6 +55,26 @@ class Rota(models.Model):
 
 
 
+class HorarioRota(models.Model):
+    """Horário de saída de uma rota em cada dia da semana (0=Seg ... 6=Dom)."""
+    DIAS = [(0, 'Seg'), (1, 'Ter'), (2, 'Qua'), (3, 'Qui'), (4, 'Sex'), (5, 'Sáb'), (6, 'Dom')]
+
+    rota = models.ForeignKey(Rota, on_delete=models.CASCADE,
+                             db_column='id_rota', related_name='horarios')
+    dia = models.PositiveSmallIntegerField(choices=DIAS)
+    horario = models.TimeField()
+
+    class Meta:
+        managed = True
+        db_table = 'horario_rota'
+        ordering = ['dia']
+        unique_together = ('rota', 'dia')
+        verbose_name_plural = "Horários das rotas"
+
+    def __str__(self):
+        return f"{self.get_dia_display()} {self.horario:%H:%M}"
+
+
 class Solicitacao(models.Model):
     rota = models.ForeignKey(Rota, on_delete=models.CASCADE,
                              db_column='id_rota', related_name='solicitacoes')

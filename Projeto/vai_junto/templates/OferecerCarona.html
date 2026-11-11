@@ -7,6 +7,7 @@
   <title>Oferecer carona · vaijunto</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/OferecerCarona.css' %}">
+  <link rel="stylesheet" href="{% static 'css/horarios.css' %}">
 </head>
 
 <body>
@@ -28,8 +29,7 @@
           <option value="{{ instituicao.id_instituicao }}">{{ instituicao.sigla }} — {{ instituicao.nome }}</option>
         {% endfor %}
       </select>
-      <label for="horario">Horário de saída</label>
-      <input id="horario" name="horario" type="time" value="{{ dados.horario }}" required>
+      {% include "includes/horarios.html" %}
       <label for="vagas">Vagas disponíveis</label>
       <input id="vagas" name="vagas" type="number" min="1" max="8" value="{{ dados.vagas|default:1 }}" required>
       <label for="transporte">Transporte</label>
@@ -40,6 +40,15 @@
       <input id="referencia" name="referencia" type="text" value="{{ dados.referencia }}">
       <button type="submit">Publicar rota</button>
     </form>
+    <script>
+      // Horário de cada dia só vale (e é obrigatório) quando o dia está marcado
+      document.querySelectorAll('input[name="dias"]').forEach(function (cb) {
+        const hora = document.querySelector('input[name="horario_' + cb.value + '"]');
+        function ligar() { hora.disabled = !cb.checked; hora.required = cb.checked; }
+        cb.addEventListener('change', ligar);
+        ligar();
+      });
+    </script>
     <p><a href="{% url 'rotas' %}">Voltar às rotas</a></p>
   </div>
 

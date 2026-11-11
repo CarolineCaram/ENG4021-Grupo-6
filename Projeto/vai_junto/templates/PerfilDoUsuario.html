@@ -31,9 +31,15 @@
       <div class="valor">{{ usuario.email }}</div>
     </div>
 
+    {% if request.session.usuario_id == usuario.id_usuario %}
+      <p><a href="{% url 'oferecer_carona' %}">Publicar nova rota</a></p>
+    {% endif %}
+
     <h2>Rotas publicadas</h2>
     {% for rota in rotas %}
-      <p><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }} · {{ rota.horario|time:"H:i" }}</a></p>
+      <p><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a>
+        · {% for h in rota.horarios.all %}{{ h.get_dia_display }} {{ h.horario|time:"H:i" }}{% if not forloop.last %}, {% endif %}{% empty %}{{ rota.horario|time:"H:i" }}{% endfor %}
+        {% if rota.grupo %} · <a href="{% url 'grupo_detalhes' rota.grupo.id_grupo %}">Grupo</a>{% endif %}</p>
     {% empty %}
       <p>Este estudante ainda não publicou rotas.</p>
     {% endfor %}

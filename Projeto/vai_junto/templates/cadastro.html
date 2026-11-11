@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/cadastro.css' %}">
+  <link rel="stylesheet" href="{% static 'css/horarios.css' %}">
 </head>
 
 <body>
@@ -107,6 +108,7 @@
 
             <label for="email">E-mail universitário ou pessoal</label>
             <input id="email" type="email" name="email" placeholder="Ex: maria@email.com" value="{{ dados.email }}" required>
+            <p class="msg-erro" id="msg-email" hidden>Este e-mail já está cadastrado. <a href="{% url 'login' %}">Entrar</a></p>
 
             <label for="senha">Senha</label>
             <input id="senha" type="password" name="senha" placeholder="Mínimo 8 caracteres" minlength="8" required>
@@ -147,7 +149,7 @@
   
           <section class="etapa" data-etapa="3">
             <h1>Sua rota</h1>
-            <p class="sub">Etapa 3 de 4 · Origem e horário</p>
+            <p class="sub">Etapa 3 de 4 · Origem e horários</p>
 
             <label for="origem">Ponto de origem</label>
             <input id="origem" type="text" name="origem" placeholder="Seu bairro" value="{{ dados.origem }}" required>
@@ -155,8 +157,7 @@
             <label for="referencia">Endereço ou referência <span class="opcional">(opcional)</span></label>
             <input id="referencia" type="text" name="referencia" placeholder="Ex: Próximo ao metrô" value="{{ dados.referencia }}">
 
-            <label for="horario">Horário de saída</label>
-            <input id="horario" type="time" name="horario" value="{{ dados.horario }}" required>
+            {% include "includes/horarios.html" %}
 
             <button type="button" class="btn btn-primario" data-acao="proxima">Continuar →</button>
             <button type="button" class="btn btn-voltar" data-acao="voltar">← Voltar</button>
@@ -199,10 +200,21 @@
       const senha = document.getElementById('senha');
       const confirmar = document.getElementById('confirmar');
       const msgSenha = document.getElementById('msg-senha');
+      const email = document.getElementById('email');
+      const msgEmail = document.getElementById('msg-email');
       const transporte = document.getElementById('transporte');
       const grupoVagas = document.getElementById('grupo-vagas');
       const vagas = document.getElementById('vagas');
+      const msgDias = document.getElementById('msg-dias');
       let atual = 1;
+
+      // Horário de cada dia só vale (e é obrigatório) quando o dia está marcado
+      form.querySelectorAll('input[name="dias"]').forEach(function (cb) {
+        const hora = form.querySelector('input[name="horario_' + cb.value + '"]');
+        function ligar() { hora.disabled = !cb.checked; hora.required = cb.checked; }
+        cb.addEventListener('change', ligar);
+        ligar();
+      });
 
       function mostrar(n) {
         atual = n;
@@ -217,6 +229,11 @@
         for (const campo of secao.querySelectorAll('input, select')) {
           if (!campo.checkValidity()) { campo.reportValidity(); return false; }
         }
+        if (n === 3 && !form.querySelector('input[name="dias"]:checked')) {
+          msgDias.hidden = false;
+          return false;
+        }
+        if (n === 3) msgDias.hidden = true;
         if (n === 1 && senha.value !== confirmar.value) {
           msgSenha.hidden = false;
           confirmar.focus();
@@ -229,16 +246,35 @@
       form.addEventListener('click', function (ev) {
         const btn = ev.target.closest('[data-acao]');
         if (!btn) return;
-        if (btn.dataset.acao === 'proxima' && etapaValida(atual)) mostrar(atual + 1);
+        if (btn.dataset.acao === 'proxima' && etapaValida(atual)) {
+          if (atual === 1) { verificarEmail().then(function (livre) { if (livre) mostrar(2); }); }
+          else mostrar(atual + 1);
+        }
         if (btn.dataset.acao === 'voltar') mostrar(atual - 1);
       });
 
       form.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter' && atual < 4 && ev.target.tagName !== 'BUTTON') {
           ev.preventDefault();
-          if (etapaValida(atual)) mostrar(atual + 1);
+          if (etapaValida(atual)) {
+            if (atual === 1) { verificarEmail().then(function (livre) { if (livre) mostrar(2); }); }
+            else mostrar(atual + 1);
+          }
         }
       });
+
+      // Etapa 1: pergunta ao servidor se o e-mail já existe antes de deixar avançar
+      function verificarEmail() {
+        msgEmail.hidden = true;
+        return fetch("{% url 'verificar_email' %}?email=" + encodeURIComponent(email.value))
+          .then(function (r) { return r.json(); })
+          .then(function (dados) {
+            if (!dados.disponivel) { msgEmail.hidden = false; email.focus(); }
+            return dados.disponivel;
+          })
+          .catch(function () { return true; });   // se a checagem falhar, o servidor ainda valida no final
+      }
+      email.addEventListener('input', function () { msgEmail.hidden = true; });
 
 
       function ajustarVagas() {

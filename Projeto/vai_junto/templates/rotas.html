@@ -13,6 +13,7 @@
       <a href="{% url 'home' %}">vaijunto</a>
       <nav>
         <a href="{% url 'oferecer_carona' %}">Oferecer carona</a>
+        {% if usuario_logado %}<a href="{% url 'perfil' usuario_logado.id_usuario %}">Meu perfil</a>{% endif %}
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}
           <button type="submit">Sair</button>

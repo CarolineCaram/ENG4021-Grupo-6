@@ -1,0 +1,13 @@
+<fieldset class="horarios">
+  <legend>Dias e horários de saída</legend>
+  {% for dia in dias %}
+    <div class="dia-horario">
+      <label class="dia-nome">
+        <input type="checkbox" name="dias" value="{{ dia.n }}" {% if dia.marcado %}checked{% endif %}>
+        {{ dia.nome }}
+      </label>
+      <input type="time" name="horario_{{ dia.n }}" value="{{ dia.horario }}" aria-label="Horário de saída de {{ dia.nome }}" {% if not dia.marcado %}disabled{% endif %}>
+    </div>
+  {% endfor %}
+  <p class="msg-dias" id="msg-dias" hidden>Marque pelo menos um dia e informe o horário de saída.</p>
+</fieldset>
