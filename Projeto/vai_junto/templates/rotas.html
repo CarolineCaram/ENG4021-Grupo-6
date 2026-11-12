@@ -31,7 +31,7 @@
         <article class="card">
             <h2><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a></h2>
             <p><strong>Motorista:</strong> {{ rota.id_usuario.nome }}</p>
-            <p><strong>Horário:</strong> {{ rota.horario }}</p>
+            <p><strong>Horário:</strong> {% for h in rota.horarios.all %}{{ h.get_dia_display }} {{ h.horario|time:"H:i" }}{% if not forloop.last %} · {% endif %}{% empty %}{{ rota.horario|time:"H:i" }}{% endfor %}</p>
             <p><strong>Ponto de Referência:</strong> {{ rota.referencia }}</p>
             <p><strong>Vagas disponíveis:</strong> <span class="badge">{{ rota.vagas }}</span></p>
         </article>

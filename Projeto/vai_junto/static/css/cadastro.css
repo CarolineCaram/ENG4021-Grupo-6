@@ -49,13 +49,12 @@ body {
   text-decoration: none;
 }
 
-.logo-icone {
-  width: 24px;
-  height: 24px;
+.logo-img {
+  height: 32px;
+  width: auto;
   border-radius: 6px;
-  background: var(--azul);
-  display: grid;
-  place-items: center;
+  background: var(--branco);
+  padding: 3px 8px;
 }
 
 .painel-conteudo {

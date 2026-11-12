@@ -222,7 +222,8 @@ def rotas(request):
 
 def rota_detalhes(request, rota_id):
     rota = get_object_or_404(Rota, id_rota=rota_id)
-    return render(request, 'rota.html', {'rota': rota})
+    return render(request, 'rota.html', {'rota': rota,
+                                         'usuario_logado': usuario_logado(request)})
 
 
 def usuarios(request):
