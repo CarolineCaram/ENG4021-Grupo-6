@@ -19,6 +19,7 @@ urlpatterns = [
     path('oferecer-carona/', views.oferecer_carona, name='oferecer_carona'),
 
     path('cadastro/', views.cadastro, name='cadastro'),
+    path('cadastro/verificar-email/', views.verificar_email, name='verificar_email'),
     path('rotas/', views.rotas, name='rotas'),
     path('rotas/<int:rota_id>/', views.rota_detalhes, name='rota_detalhes'),
     path('usuarios/', views.usuarios, name='usuarios'),

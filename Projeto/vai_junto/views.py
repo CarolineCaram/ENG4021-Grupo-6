@@ -1,8 +1,9 @@
 from datetime import datetime
 
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
-from vai_junto.models import Usuario, Rota, Grupo, Carona, Instituicao
+from vai_junto.models import Usuario, Rota, Grupo, Carona, Instituicao, HorarioRota
 
 
 # ---------------------------------------------------------------
@@ -13,6 +14,37 @@ def usuario_logado(request):
     if uid:
         return Usuario.objects.filter(id_usuario=uid).first()
     return None
+
+
+# ---------------------------------------------------------------
+# Horários por dia da semana (formulário: checkbox "dias" + campo "horario_<n>")
+# ---------------------------------------------------------------
+def dias_do_formulario(post=None):
+    """Lista de dias pro template: número, nome, se está marcado e o horário digitado."""
+    marcados = post.getlist('dias') if post else []
+    return [{'n': n, 'nome': nome, 'marcado': str(n) in marcados,
+             'horario': post.get('horario_%d' % n, '') if post else ''}
+            for n, nome in HorarioRota.DIAS]
+
+
+def ler_horarios(post):
+    """Devolve [(dia, hora), ...] dos dias marcados, ou None se algum horário for inválido."""
+    horarios = []
+    for n, _ in HorarioRota.DIAS:
+        if str(n) in post.getlist('dias'):
+            try:
+                horarios.append((n, datetime.strptime(post.get('horario_%d' % n, ''), '%H:%M').time()))
+            except ValueError:
+                return None
+    return horarios
+
+
+def criar_rota(horarios, **campos):
+    """Cria a Rota (horario = o mais cedo da semana) e um HorarioRota por dia marcado."""
+    rota = Rota.objects.create(horario=min(h for _, h in horarios), **campos)
+    HorarioRota.objects.bulk_create(
+        [HorarioRota(rota=rota, dia=dia, horario=h) for dia, h in horarios])
+    return rota
 
 
 def home(request):
@@ -67,7 +99,62 @@ def cadastro_meio_transporte(request):
     return render(request, 'cadastromeiotransporte.html')
 
 def oferecer_carona(request):
-    return render(request, 'OferecerCarona.html')
+    usuario = usuario_logado(request)
+    if not usuario:
+        return redirect('login')
+
+    erro = None
+    if request.method == 'POST':
+        dados = request.POST
+        origem = dados.get('origem', '').strip()
+        instituicao_id = dados.get('instituicao', '')
+        horarios = ler_horarios(dados)
+        vagas_texto = dados.get('vagas', '')
+        instituicao = (
+            Instituicao.objects.filter(pk=instituicao_id).first()
+            if instituicao_id.isdigit() else None
+        )
+
+        try:
+            vagas = int(vagas_texto)
+        except (TypeError, ValueError):
+            vagas = 0
+
+        if not origem:
+            erro = 'Informe o ponto de origem.'
+        elif not instituicao:
+            erro = 'Selecione uma instituição válida.'
+        elif not horarios:
+            erro = 'Escolha pelo menos um dia e informe o horário de saída de cada dia marcado.'
+        elif not 1 <= vagas <= 8:
+            erro = 'Informe entre 1 e 8 vagas.'
+        elif dados.get('transporte') not in {'Carro', 'Moto', 'Van'}:
+            erro = 'Selecione um meio de transporte válido.'
+        else:
+            criar_rota(
+                horarios,
+                id_usuario=usuario,
+                id_instituicao=instituicao,
+                origem=origem,
+                referencia=dados.get('referencia', '').strip() or None,
+                transporte=dados.get('transporte', 'Carro'),
+                vagas=vagas,
+            )
+            return redirect('rotas')
+
+    return render(request, 'OferecerCarona.html', {
+        'erro': erro,
+        'dados': request.POST,
+        'dias': dias_do_formulario(request.POST if request.method == 'POST' else None),
+        'instituicoes': Instituicao.objects.all(),
+    })
+
+
+def verificar_email(request):
+    '''Usado pela etapa 1 do cadastro: diz se o e-mail ainda está livre.'''
+    email = request.GET.get('email', '').strip().lower()
+    livre = bool(email) and not Usuario.objects.filter(email__iexact=email).exists()
+    return JsonResponse({'disponivel': livre})
 
 
 def cadastro(request):
@@ -100,20 +187,15 @@ def cadastro(request):
             inst_id = d.get('instituicao', '')
             instituicao = Instituicao.objects.filter(pk=inst_id).first() if inst_id.isdigit() else None
             origem = d.get('origem', '').strip()
-            try:
-                horario = datetime.strptime(d.get('horario', ''), '%H:%M').time()
-            except ValueError:
-                horario = None
-            if instituicao and origem and horario:
+            horarios = ler_horarios(d)   # um horário por dia da semana marcado
+            if instituicao and origem and horarios:
                 vagas = d.get('vagas', '')
-                extra = {}
-                if any(f.name == 'dias' for f in Rota._meta.get_fields()):   # só se você criou o campo "dias"
-                    extra['dias'] = ','.join(d.getlist('dias'))
-                Rota.objects.create(
+                criar_rota(
+                    horarios,
                     id_usuario=usuario, id_instituicao=instituicao, origem=origem,
                     referencia=d.get('referencia', '').strip() or None,
-                    horario=horario, transporte=d.get('transporte', '') or 'passageiro',
-                    vagas=int(vagas) if vagas.isdigit() else 0, **extra)
+                    transporte=d.get('transporte', '') or 'passageiro',
+                    vagas=int(vagas) if vagas.isdigit() else 0)
 
             request.session['usuario_id'] = usuario.id_usuario
             return redirect('rotas')
@@ -121,6 +203,7 @@ def cadastro(request):
     return render(request, 'cadastro.html', {
         'erro': erro,
         'dados': request.POST,
+        'dias': dias_do_formulario(request.POST if request.method == 'POST' else None),
         'instituicoes': Instituicao.objects.all(),
     })
 
@@ -139,7 +222,8 @@ def rotas(request):
 
 def rota_detalhes(request, rota_id):
     rota = get_object_or_404(Rota, id_rota=rota_id)
-    return render(request, 'rota.html', {'rota': rota})
+    return render(request, 'rota.html', {'rota': rota,
+                                         'usuario_logado': usuario_logado(request)})
 
 
 def usuarios(request):
@@ -151,8 +235,13 @@ def usuario_remover(request, usuario_id):
     '''GET mostra a confirmação. POST apaga o usuário.'''
     usuario = get_object_or_404(Usuario, id_usuario=usuario_id)
     if request.method == 'POST':
-        usuario.delete()
-        return redirect('usuarios')
+        if request.POST.get('confirmacao', '').strip() == 'REMOVER':
+            usuario.delete()
+            return redirect('usuarios')
+        return render(request, 'remocao.html', {
+            'usuario': usuario,
+            'erro': 'Digite REMOVER para confirmar a exclusão.',
+        })
     return render(request, 'remocao.html', {'usuario': usuario})
 
 

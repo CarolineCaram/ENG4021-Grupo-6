@@ -5,29 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cadastrar veículo</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/cadastrar_veiculo.css' %}">
 </head>
 <body>
   <main>
     <h1>Cadastrar veículo</h1>
 
-    <form method="post" action="">
-      {% csrf_token %}
-
-      <label for="modelo">Modelo</label>
-      <input type="text" id="modelo" name="modelo" required>
-
-      <label for="cor">Cor</label>
-      <input type="text" id="cor" name="cor" required>
-
-      <label for="placa">Placa</label>
-      <input type="text" id="placa" name="placa" maxlength="7" required>
-
-      <label for="vagas">Número de vagas</label>
-      <input type="number" id="vagas" name="vagas" min="1" max="6" required>
-
-      <button type="submit">Salvar</button>
-    </form>
+    <p>O cadastro de veículos ainda não está disponível. Para oferecer carona, informe seu transporte e as vagas ao criar uma rota.</p>
+    <div>
+      <a href="{% url 'oferecer_carona' %}">Cadastrar uma rota</a>
+      <a href="{% url 'rotas' %}">Voltar às rotas</a>
+    </div>
   </main>
 </body>
 </html>

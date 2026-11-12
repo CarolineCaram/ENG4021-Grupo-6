@@ -5,22 +5,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Detalhes da carona</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/Detalhescarona.css' %}">
 </head>
 <body>
   <main>
     <h1>Detalhes da carona</h1>
 
-    <p><strong>Origem:</strong> {{ carona.origem }}</p>
-    <p><strong>Destino:</strong> {{ carona.destino }}</p>
-    <p><strong>Horário:</strong> {{ carona.horario }}</p>
-    <p><strong>Vagas:</strong> {{ carona.vagas }}</p>
-    <p><strong>Motorista:</strong> {{ carona.motorista.nome }}</p>
-
-    <form method="post" action="{% url 'solicitar_vaga' carona.id %}">
-      {% csrf_token %}
-      <button type="submit">Solicitar vaga</button>
-    </form>
+    <p><strong>Rota:</strong> <a href="{% url 'rota_detalhes' carona.rota.id_rota %}">{{ carona.rota.origem }} → {{ carona.rota.id_instituicao.sigla }}</a></p>
+    <p><strong>Data:</strong> {{ carona.data|date:"d/m/Y" }}</p>
+    <p><strong>Horário:</strong> {{ carona.rota.horario|time:"H:i" }}</p>
+    <p><strong>Status:</strong> {{ carona.status }}</p>
+    <p><strong>Motorista:</strong> <a href="{% url 'perfil' carona.rota.id_usuario.id_usuario %}">{{ carona.rota.id_usuario.nome }}</a></p>
+    <h2>Passageiros</h2>
+    {% for passageiro in passageiros %}<p>{{ passageiro.nome }}</p>{% empty %}<p>Nenhum passageiro confirmado.</p>{% endfor %}
+    <p><a href="{% url 'rotas' %}">Voltar às rotas</a></p>
   </main>
 </body>
 </html>

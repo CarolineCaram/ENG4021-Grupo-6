@@ -1,42 +1,48 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>vaijunto</title>
-
-  <link rel="stylesheet" href="css/PerfilDoUsuario.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Perfil · vaijunto</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/PerfilDoUsuario.css' %}">
 </head>
 
 <body>
 
   <div class="caixa">
     <h2>vaijunto</h2>
-    <h1>Meu perfil</h1>
-
-    <div class="foto">MC</div>
-    <div class="verificado">Matrícula verificada</div>
+    <a href="{% url 'rotas' %}">← Voltar às rotas</a>
+    <h1>Perfil de {{ usuario.nome }}</h1>
 
     <div class="dado">
       <div class="titulo">Nome completo</div>
-      <div class="valor">Maria Clara Oliveira</div>
+      <div class="valor">{{ usuario.nome }}</div>
     </div>
 
     <div class="dado">
       <div class="titulo">Número de matrícula</div>
-      <div class="valor">2510227</div>
+      <div class="valor">{{ usuario.matricula }}</div>
     </div>
 
     <div class="dado">
-      <div class="titulo">Universidade</div>
-      <div class="valor">PUC-Rio</div>
+      <div class="titulo">E-mail</div>
+      <div class="valor">{{ usuario.email }}</div>
     </div>
 
-    <div class="dado">
-      <div class="titulo">Curso</div>
-      <div class="valor">Engenharia de Produção</div>
-    </div>
+    {% if request.session.usuario_id == usuario.id_usuario %}
+      <p><a href="{% url 'oferecer_carona' %}">Publicar nova rota</a></p>
+    {% endif %}
 
-    <button>Editar perfil</button>
+    <h2>Rotas publicadas</h2>
+    {% for rota in rotas %}
+      <p><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a>
+        · {% for h in rota.horarios.all %}{{ h.get_dia_display }} {{ h.horario|time:"H:i" }}{% if not forloop.last %}, {% endif %}{% empty %}{{ rota.horario|time:"H:i" }}{% endfor %}
+        {% if rota.grupo %} · <a href="{% url 'grupo_detalhes' rota.grupo.id_grupo %}">Grupo</a>{% endif %}</p>
+    {% empty %}
+      <p>Este estudante ainda não publicou rotas.</p>
+    {% endfor %}
   </div>
 
 </body>

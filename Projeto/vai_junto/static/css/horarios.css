@@ -1,0 +1,56 @@
+.horarios {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 8px 0 14px;
+  text-align: left;
+}
+
+.horarios legend {
+  font-size: 13px;
+  font-weight: bold;
+  color: #172554;
+  padding: 0 6px;
+}
+
+.dia-horario {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.dia-horario .dia-nome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: #172554;
+}
+
+.dia-horario input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.dia-horario input[type="time"] {
+  width: 120px;
+  margin: 0;
+}
+
+.dia-horario input[type="time"]:disabled {
+  opacity: 0.4;
+}
+
+.msg-dias {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #b91c1c;
+}
+
+.msg-dias[hidden] {
+  display: none;
+}

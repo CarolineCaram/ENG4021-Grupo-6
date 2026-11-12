@@ -8,7 +8,7 @@ django.setup()
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from vai_junto.models import (Instituicao, Usuario, Rota, Solicitacao,
-                              Grupo, Mensagem, Carona)
+                              Grupo, Mensagem, Carona, HorarioRota)
 
 print("--- INICIANDO POPULAÇÃO DO BANCO ---")
 
@@ -28,9 +28,12 @@ bruno, _ = Usuario.objects.get_or_create(
 
 rota, _ = Rota.objects.get_or_create(
     id_rota=1,
-    defaults={'usuario': ana, 'instituicao': puc, 'origem': 'Irajá',
+    defaults={'id_usuario': ana, 'id_instituicao': puc, 'origem': 'Irajá',
               'referencia': 'Próximo ao metrô', 'horario': time(7, 0),
               'transporte': 'carro', 'vagas': 3})
+
+for dia in range(5):   # saída às 7h de segunda a sexta
+    HorarioRota.objects.get_or_create(rota=rota, dia=dia, defaults={'horario': time(7, 0)})
 
 Solicitacao.objects.get_or_create(
     rota=rota, solicitante=bruno,

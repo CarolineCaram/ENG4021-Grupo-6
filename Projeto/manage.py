@@ -3,10 +3,17 @@
 
 import os
 import sys
+from pathlib import Path
 
 
 def main():
     """Run administrative tasks."""
+    project_root = Path(__file__).resolve().parent
+    venv_python = project_root / "venv" / "bin" / "python"
+
+    if venv_python.exists() and sys.executable != str(venv_python):
+        os.execv(str(venv_python), [str(venv_python), *sys.argv])
+
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vai_junto.settings")
     try:
         from django.core.management import execute_from_command_line

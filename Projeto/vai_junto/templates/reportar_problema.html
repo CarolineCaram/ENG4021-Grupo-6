@@ -5,28 +5,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reportar problema</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/reportar_problema.css' %}">
 </head>
 <body>
   <main>
     <h1>Reportar problema</h1>
 
-    <form method="post" action="">
-      {% csrf_token %}
-
-      <label for="tipo">Tipo de problema</label>
-      <select id="tipo" name="tipo" required>
-        <option value="">Selecione</option>
-        <option value="comportamento">Comportamento inadequado</option>
-        <option value="nao_realizada">Carona não realizada</option>
-        <option value="erro_app">Erro no app</option>
-      </select>
-
-      <label for="descricao">Descrição</label>
-      <textarea id="descricao" name="descricao" rows="5" required></textarea>
-
-      <button type="submit">Enviar</button>
-    </form>
+    <p>O envio de denúncias ainda não está disponível. Se houver risco imediato, procure os canais de atendimento da sua instituição.</p>
+    <p><a href="{% url 'rotas' %}">Voltar às rotas</a></p>
   </main>
 </body>
 </html>

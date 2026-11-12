@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,27 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa e Rotas - Carona Universitária</title>
 
-    <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="css/mapa.css">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/mapa.css' %}">
 </head>
 <body>
     <header>
         <h1>Mapa de Rotas</h1>
         <nav>
-            <a href="index.html">Voltar ao Início</a>
+            <a href="{% url 'rotas' %}">Ver rotas disponíveis</a>
         </nav>
     </header>
 
     <main>
-        <div style="padding: 20px;">
-            <label for="autocomplete">Digite o seu endereço:</label>
-            <input type="text" id="autocomplete" placeholder="Ex: Av. Principal, 1000" style="width: 100%; padding: 8px; margin-top: 5px;">
-        </div>
-        <div id="map"></div>
+        <section class="busca-mapa">
+          <h2>Encontre uma rota</h2>
+          <p>Pesquise as caronas cadastradas por bairro ou ponto de origem.</p>
+          <form action="{% url 'rotas' %}" method="get">
+            <label for="autocomplete">Ponto de origem</label>
+            <input type="search" id="autocomplete" name="q" placeholder="Ex.: Centro">
+            <button type="submit">Buscar rotas</button>
+          </form>
+        </section>
     </main>
 
-    <script src="../js/map.js"></script>
- 
-    <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_DE_API&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>

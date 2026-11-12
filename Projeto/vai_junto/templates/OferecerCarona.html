@@ -1,10 +1,13 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>vaijunto</title>
-
-  <link rel="stylesheet" href="css/OferecerCarona.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oferecer carona · vaijunto</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/OferecerCarona.css' %}">
+  <link rel="stylesheet" href="{% static 'css/horarios.css' %}">
 </head>
 
 <body>
@@ -14,34 +17,39 @@
     <h1>Oferecer carona</h1>
     <p>Cadastre o trajeto que você vai fazer e divida o caminho com outros estudantes.</p>
 
-    <label>Origem</label>
-    <input type="text" placeholder="Seu bairro ou endereço">
-
-    <label>Destino</label>
-    <input type="text" placeholder="Sua faculdade">
-
-    <label>Horário de saída</label>
-    <input type="time">
-
-    <label>Vagas disponíveis</label>
-    <select>
-      <option>1 vaga</option>
-      <option>2 vagas</option>
-      <option>3 vagas</option>
-      <option>4 vagas</option>
-    </select>
-
-    <label>Tipo de veículo</label>
-    <select>
-      <option>Carro</option>
-      <option>Moto</option>
-      <option>Van</option>
-    </select>
-
-    <label>Observações (opcional)</label>
-    <textarea placeholder="Ex.: passo pela Barra, só levo mochila pequena..."></textarea>
-
-    <button>Oferecer carona</button>
+    {% if erro %}<p class="erro" role="alert">{{ erro }}</p>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <label for="origem">Origem</label>
+      <input id="origem" name="origem" type="text" value="{{ dados.origem }}" placeholder="Seu bairro" required>
+      <label for="instituicao">Faculdade de destino</label>
+      <select id="instituicao" name="instituicao" required>
+        <option value="">Selecione sua faculdade</option>
+        {% for instituicao in instituicoes %}
+          <option value="{{ instituicao.id_instituicao }}">{{ instituicao.sigla }} — {{ instituicao.nome }}</option>
+        {% endfor %}
+      </select>
+      {% include "includes/horarios.html" %}
+      <label for="vagas">Vagas disponíveis</label>
+      <input id="vagas" name="vagas" type="number" min="1" max="8" value="{{ dados.vagas|default:1 }}" required>
+      <label for="transporte">Transporte</label>
+      <select id="transporte" name="transporte">
+        <option value="Carro">Carro</option><option value="Moto">Moto</option><option value="Van">Van</option>
+      </select>
+      <label for="referencia">Ponto de referência (opcional)</label>
+      <input id="referencia" name="referencia" type="text" value="{{ dados.referencia }}">
+      <button type="submit">Publicar rota</button>
+    </form>
+    <script>
+      // Horário de cada dia só vale (e é obrigatório) quando o dia está marcado
+      document.querySelectorAll('input[name="dias"]').forEach(function (cb) {
+        const hora = document.querySelector('input[name="horario_' + cb.value + '"]');
+        function ligar() { hora.disabled = !cb.checked; hora.required = cb.checked; }
+        cb.addEventListener('change', ligar);
+        ligar();
+      });
+    </script>
+    <p><a href="{% url 'rotas' %}">Voltar às rotas</a></p>
   </div>
 
 </body>

@@ -1,58 +1,35 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>vaijunto</title>
-
-  <link rel="stylesheet" href="css/gruposrota.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/gruposrota.css' %}">
 </head>
 
 <body>
 
   <div class="caixa">
     <h2>vaijunto</h2>
-    <h1>Grupo da sua rota</h1>
-    <p class="descricao">Estudantes da sua faculdade com trajetos compatíveis com o seu.</p>
-
-    <div class="aluno">
-      <div class="foto">LM</div>
-      <div class="info">
-        <div class="nome">Lucas Mendes</div>
-        <div class="detalhe">Engenharia · Vila Madalena</div>
-        <div class="verificado">Matrícula verificada</div>
+    <a href="{% url 'rota_detalhes' grupo.rota.id_rota %}">← Voltar à rota</a>
+    <h1>{{ grupo.nome }}</h1>
+    <p class="descricao">{{ grupo.rota.origem }} → {{ grupo.rota.id_instituicao.sigla }}</p>
+    <h2>Membros</h2>
+    {% for membro in membros %}
+      <div class="aluno">
+        <div class="info"><a class="nome" href="{% url 'perfil' membro.id_usuario %}">{{ membro.nome }}</a></div>
       </div>
-      <button class="btn-contato">Contatar</button>
-    </div>
-
-    <div class="aluno">
-      <div class="foto">AF</div>
-      <div class="info">
-        <div class="nome">Ana Ferreira</div>
-        <div class="detalhe">Direito · Pinheiros</div>
-        <div class="verificado">Matrícula verificada</div>
-      </div>
-      <button class="btn-contato">Contatar</button>
-    </div>
-
-    <div class="aluno">
-      <div class="foto">RS</div>
-      <div class="info">
-        <div class="nome">Rafael Souza</div>
-        <div class="detalhe">Administração · Perdizes</div>
-        <div class="verificado">Matrícula verificada</div>
-      </div>
-      <button class="btn-contato">Contatar</button>
-    </div>
-
-    <div class="aluno">
-      <div class="foto">CM</div>
-      <div class="info">
-        <div class="nome">Carla Martins</div>
-        <div class="detalhe">Psicologia · Butantã</div>
-        <div class="verificado">Matrícula verificada</div>
-      </div>
-      <button class="btn-contato">Contatar</button>
-    </div>
+    {% empty %}
+      <p>Este grupo ainda não tem membros.</p>
+    {% endfor %}
+    <h2>Mensagens</h2>
+    {% for mensagem in mensagens %}
+      <p><strong>{{ mensagem.usuario.nome }}</strong> · {{ mensagem.enviada_em|date:"d/m/Y H:i" }}: {{ mensagem.texto }}</p>
+    {% empty %}
+      <p>Nenhuma mensagem ainda.</p>
+    {% endfor %}
 
   </div>
 
