@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>vaijunto</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FAFC;
+      color: #172554;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 30px 0;
+    }
+
+    .caixa {
+      background-color: #ffffff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 32px;
+      width: 400px;
+    }
+
+    h2 {
+      color: #2563EB;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-top: 0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .notificacao {
+      display: flex;
+      align-items: flex-start;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .icone {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .verde { background-color: #DCFCE7; }
+    .azul { background-color: #DBEAFE; }
+    .amarelo { background-color: #FEF9C3; }
+
+    .texto .titulo {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .texto .descricao {
+      font-size: 13px;
+      color: #64748B;
+    }
+
+    .texto .tempo {
+      font-size: 11px;
+      color: #94A3B8;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+    <h2>vaijunto</h2>
+    <h1>Notificações</h1>
+
+    <div class="notificacao">
+      <div class="icone verde">✓</div>
+      <div class="texto">
+        <div class="titulo">Carona confirmada</div>
+        <div class="descricao">Sua carona com Lucas Mendes para a PUC-Rio foi confirmada.</div>
+        <div class="tempo">há 5 minutos</div>
+      </div>
+    </div>
+
+    <div class="notificacao">
+      <div class="icone azul">👤</div>
+      <div class="texto">
+        <div class="titulo">Novo pedido de vaga</div>
+        <div class="descricao">Ana Ferreira solicitou uma vaga na sua carona de amanhã.</div>
+        <div class="tempo">há 1 hora</div>
+      </div>
+    </div>
+
+    <div class="notificacao">
+      <div class="icone amarelo">⏰</div>
+      <div class="texto">
+        <div class="titulo">Lembrete de saída</div>
+        <div class="descricao">Sua carona sai em 30 minutos. Não se atrase!</div>
+        <div class="tempo">há 2 horas</div>
+      </div>
+    </div>
+
+    <div class="notificacao">
+      <div class="icone azul">★</div>
+      <div class="texto">
+        <div class="titulo">Avalie sua carona</div>
+        <div class="descricao">Como foi sua viagem com Rafael Souza? Deixe uma avaliação.</div>
+        <div class="tempo">ontem</div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
