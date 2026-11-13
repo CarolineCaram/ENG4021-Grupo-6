@@ -1,9 +1,12 @@
-from datetime import datetime
+from functools import wraps
+from datetime import date, datetime
+from django.utils import timezone
 
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
-from vai_junto.models import Usuario, Rota, Grupo, Carona, Instituicao, HorarioRota
+from vai_junto.models import (Usuario, Rota, Grupo, Carona, Instituicao,
+                              HorarioRota, Solicitacao)
 
 
 # ---------------------------------------------------------------
@@ -15,6 +18,41 @@ def usuario_logado(request):
         return Usuario.objects.filter(id_usuario=uid).first()
     return None
 
+def login_necessario(view):
+    '''Sem login, manda para /login/. Dentro da view, o usuário fica em request.usuario.'''
+    @wraps(view)
+    def interna(request, *args, **kwargs):
+        usuario = usuario_logado(request)
+        if not usuario:
+            return redirect('login')
+        request.usuario = usuario
+        return view(request, *args, **kwargs)
+    return interna
+
+
+def ultima_rota(usuario):
+    return usuario.rotas.order_by('-id_rota').first()
+
+
+def buscar_matches(rota, janela=60):
+    '''Estudantes compatíveis: mesma instituição e horário até `janela` minutos
+    de diferença. Quem tem a mesma origem aparece primeiro.'''
+    def minutos(h):
+        return h.hour * 60 + h.minute
+
+    candidatas = (Rota.objects
+                  .filter(id_instituicao=rota.id_instituicao)
+                  .exclude(id_usuario=rota.id_usuario)
+                  .select_related('id_usuario', 'id_instituicao'))
+    matches = []
+    for c in candidatas:
+        dif = abs(minutos(c.horario) - minutos(rota.horario))
+        if dif <= janela:
+            c.dif_min = dif
+            c.mesma_origem = c.origem.strip().lower() == rota.origem.strip().lower()
+            matches.append(c)
+    matches.sort(key=lambda c: (not c.mesma_origem, c.dif_min))
+    return matches
 
 # ---------------------------------------------------------------
 # Horários por dia da semana (formulário: checkbox "dias" + campo "horario_<n>")
@@ -253,12 +291,15 @@ def perfil(request, usuario_id):
     })
 
 
+@login_necessario
 def grupo_detalhes(request, grupo_id):
     grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
     return render(request, 'gruposrota.html', {
+        'detalhe': True,
         'grupo': grupo,
         'membros': grupo.usuarios.all(),
         'mensagens': grupo.mensagens.select_related('usuario'),
+        'usuario_logado': request.usuario,
     })
 
 
@@ -267,4 +308,108 @@ def carona_detalhes(request, carona_id):
     return render(request, 'Detalhescarona.html', {
         'carona': carona,
         'passageiros': carona.passageiros.all(),
+    })
+
+@login_necessario
+def grupos_rota(request):
+    '''Etapa 7: estudantes compatíveis (Descobrir) e contatos (Meu grupo).'''
+    usuario = request.usuario
+    rota = ultima_rota(usuario)
+    if not rota:
+        return redirect('oferecer_carona')
+
+    enviadas = (Solicitacao.objects.filter(solicitante=usuario)
+                .select_related('rota__id_usuario', 'rota__id_instituicao')
+                .order_by('-criada_em'))
+    ja_solicitadas = {s.rota_id for s in enviadas}
+
+    matches = buscar_matches(rota)
+    for m in matches:
+        m.ja_solicitada = m.id_rota in ja_solicitadas
+
+    recebidas = (Solicitacao.objects
+                 .filter(rota__id_usuario=usuario, status='pendente')
+                 .select_related('solicitante', 'rota__id_instituicao'))
+
+    pendentes = sum(1 for s in enviadas if s.status == 'pendente') + recebidas.count()
+
+    return render(request, 'gruposrota.html', {
+        'detalhe': False,
+        'rota': rota,
+        'matches': matches,
+        'enviadas': enviadas,
+        'recebidas': recebidas,
+        'pendentes': pendentes,
+        'meus_grupos': usuario.grupos.select_related('rota__id_instituicao'),
+        'usuario_logado': usuario,
+    })
+
+
+@login_necessario
+def contatar(request, rota_id):
+    '''Botão "Contatar": registra o pedido para pegar carona naquela rota.'''
+    rota = get_object_or_404(Rota, id_rota=rota_id)
+    if request.method == 'POST' and rota.id_usuario_id != request.usuario.pk:
+        Solicitacao.objects.get_or_create(rota=rota, solicitante=request.usuario)
+    return redirect('grupos_rota')
+
+
+@login_necessario
+def confirmar_solicitacao(request, solicitacao_id):
+    '''O motorista aceita um pedido. Cria o grupo e a carona e abre a confirmação.'''
+    sol = get_object_or_404(Solicitacao, pk=solicitacao_id)
+    rota = sol.rota
+
+    if request.method != 'POST' or rota.id_usuario_id != request.usuario.pk:
+        return redirect('grupos_rota')
+
+    try:
+        data = datetime.strptime(request.POST.get('data', ''), '%Y-%m-%d').date()
+    except ValueError:
+        data = date.today()
+
+    grupo, _ = Grupo.objects.get_or_create(
+        rota=rota,
+        defaults={'nome': f'{rota.origem} → {rota.id_instituicao.sigla}'})
+    grupo.usuarios.add(rota.id_usuario, sol.solicitante)
+
+    carona = Carona.objects.filter(rota=rota, data=data).first()
+    if carona is None:
+        carona = Carona.objects.create(grupo=grupo, rota=rota, data=data, status='confirmada')
+
+    ja_esta = carona.passageiros.filter(pk=sol.solicitante.pk).exists()
+    if ja_esta or carona.passageiros.count() < rota.vagas:
+        carona.passageiros.add(sol.solicitante)
+        sol.status = 'aceita'
+        sol.respondida_em = timezone.now()
+        sol.save()
+        return redirect('confirmacao_carona', carona_id=carona.id_carona)
+
+    sol.status = 'recusada'   # carona cheia
+    sol.respondida_em = timezone.now()
+    sol.save()
+    return redirect('grupos_rota')
+
+
+@login_necessario
+def confirmacao_carona(request, carona_id):
+    '''Tela "Carona confirmada!" (RF12). Só quem participa vê.'''
+    carona = get_object_or_404(Carona, id_carona=carona_id)
+    rota = carona.rota
+    motorista = rota.id_usuario
+    passageiros = carona.passageiros.all()
+
+    eh_motorista = motorista.pk == request.usuario.pk
+    if not eh_motorista and not passageiros.filter(pk=request.usuario.pk).exists():
+        return redirect('grupos_rota')
+
+    return render(request, 'confirmacao_carona.html', {
+        'carona': carona,
+        'rota': rota,
+        'motorista': motorista,
+        'passageiros': passageiros,
+        'grupo': carona.grupo,
+        'eh_motorista': eh_motorista,
+        'vagas_restantes': max(rota.vagas - passageiros.count(), 0),
+        'usuario_logado': request.usuario,
     })
