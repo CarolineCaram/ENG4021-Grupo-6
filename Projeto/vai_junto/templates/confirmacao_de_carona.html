@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carona confirmada | VaiJunto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/confirmacao_carona.css' %}">
+</head>
+<body class="conf-body">
+
+    <header class="conf-topo">
+        <div class="conf-topo-interno">
+            <a class="conf-logo" href="{% url 'grupos_rota' %}">
+                vai<b>junto</b>
+                <small>CARONAS UNIVERSITÁRIAS</small>
+            </a>
+            <div class="conf-avatar">{{ usuario_logado.nome|first|upper }}</div>
+        </div>
+    </header>
+
+    <main class="conf-main">
+
+        <section class="conf-sucesso">
+            <div class="conf-check">
+                <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            </div>
+            <h1>Carona confirmada!</h1>
+            <p>
+                {% if eh_motorista %}
+                    Você aceitou o pedido. Os passageiros já foram avisados.
+                {% else %}
+                    {{ motorista.nome }} aceitou o seu pedido. Bom trajeto!
+                {% endif %}
+            </p>
+        </section>
+
+     
+        <section class="conf-rota">
+            <div>
+                <div class="conf-rota-titulo">RESUMO DA VIAGEM</div>
+                <div class="conf-linha"><span class="conf-selo origem">Origem</span> {{ rota.origem }}</div>
+                <div class="conf-linha"><span class="conf-selo destino">Destino</span> {{ rota.id_instituicao.sigla }}</div>
+            </div>
+            <div class="conf-numeros">
+                <div class="conf-numero">
+                    <strong>{{ rota.horario|time:"H:i" }}</strong>
+                    <span>saída</span>
+                </div>
+                <div class="conf-numero">
+                    <strong>{{ carona.data|date:"d/m" }}</strong>
+                    <span>{{ carona.data|date:"l" }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quem vai -->
+        <section class="conf-card">
+            <h2>Quem vai na carona</h2>
+
+            <div class="conf-pessoa">
+                <div class="conf-iniciais amarelo">{{ motorista.nome|first|upper }}</div>
+                <div class="conf-pessoa-info">
+                    <strong>{{ motorista.nome }}</strong>
+                    <span>Motorista · matrícula {{ motorista.matricula }}</span>
+                </div>
+                <span class="conf-tag azul">Motorista</span>
+            </div>
+
+            {% for p in passageiros %}
+                <div class="conf-pessoa">
+                    <div class="conf-iniciais">{{ p.nome|first|upper }}</div>
+                    <div class="conf-pessoa-info">
+                        <strong>{{ p.nome }}</strong>
+                        <span>Passageiro · matrícula {{ p.matricula }}</span>
+                    </div>
+                    <span class="conf-tag">Confirmado</span>
+                </div>
+            {% endfor %}
+        </section>
+
+      
+        <section class="conf-card">
+            <h2>Detalhes</h2>
+            <div class="conf-detalhe">
+                <span>Ponto de encontro</span>
+                <span>{{ rota.referencia|default:"A combinar no grupo" }}</span>
+            </div>
+            <div class="conf-detalhe">
+                <span>Transporte</span>
+                <span>
+                    {% if rota.transporte == 'carro' %}🚗{% elif rota.transporte == 'moto' %}🏍️{% elif rota.transporte == 'van' %}🚐{% elif rota.transporte == 'bike' %}🚲{% endif %}
+                    {{ rota.transporte|capfirst }}
+                </span>
+            </div>
+            <div class="conf-detalhe">
+                <span>Vagas restantes</span>
+                <span>{{ vagas_restantes }} de {{ rota.vagas }}</span>
+            </div>
+            <div class="conf-detalhe">
+                <span>Status</span>
+                <span>{{ carona.status|capfirst }}</span>
+            </div>
+        </section>
+
+        <div class="conf-aviso">
+            <strong>Combine os detalhes com o grupo!</strong>
+            <span>Confirme o horário e o ponto de encontro diretamente com seus colegas.</span>
+        </div>
+
+        <div class="conf-botoes">
+            {% if grupo %}
+                <a class="conf-botao principal" href="{% url 'grupo_detalhes' grupo.id_grupo %}">Ir para o grupo</a>
+            {% endif %}
+            <a class="conf-botao secundario" href="{% url 'grupos_rota' %}">Voltar aos grupos</a>
+        </div>
+
+    </main>
+</body>
+</html>

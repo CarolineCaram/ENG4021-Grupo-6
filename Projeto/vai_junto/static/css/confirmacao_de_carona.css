@@ -1,0 +1,252 @@
+.conf-body {
+    margin: 0;
+    background: #f8fafc;
+    color: #0f1f4d;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+
+.conf-topo {
+    background: #fff;
+    border-bottom: 1px solid #e8edf3;
+}
+.conf-topo-interno {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.conf-logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f1f4d;
+    text-decoration: none;
+}
+.conf-logo b { color: #2563eb; }
+.conf-logo small {
+    display: block;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: #64748b;
+    font-weight: 600;
+}
+.conf-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.conf-main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 28px 16px 48px;
+}
+
+
+.conf-sucesso {
+    text-align: center;
+    margin-bottom: 24px;
+}
+.conf-check {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: #dcfce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: conf-pulso 0.6s ease-out;
+}
+.conf-check svg {
+    width: 40px;
+    height: 40px;
+    stroke: #16a34a;
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: conf-tracar 0.5s 0.3s ease-out forwards;
+}
+@keyframes conf-tracar { to { stroke-dashoffset: 0; } }
+@keyframes conf-pulso {
+    0%   { transform: scale(0.6); opacity: 0; }
+    70%  { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+}
+.conf-sucesso h1 {
+    margin: 0 0 6px;
+    font-size: 26px;
+}
+.conf-sucesso p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+
+.conf-rota {
+    background: linear-gradient(135deg, #0f1f4d 0%, #1e3a8a 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+.conf-rota-titulo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #93c5fd;
+    margin-bottom: 8px;
+}
+.conf-linha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-weight: 700;
+    font-size: 16px;
+}
+.conf-selo {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    color: #fff;
+}
+.conf-selo.origem  { background: #22c55e; }
+.conf-selo.destino { background: #2563eb; }
+.conf-numeros {
+    display: flex;
+    align-items: center;
+}
+.conf-numero {
+    text-align: center;
+    padding: 0 18px;
+}
+.conf-numero + .conf-numero { border-left: 1px solid rgba(255, 255, 255, 0.25); }
+.conf-numero strong {
+    display: block;
+    font-size: 24px;
+    font-weight: 800;
+}
+.conf-numero span {
+    font-size: 12px;
+    color: #93c5fd;
+}
+
+
+.conf-card {
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 14px;
+    padding: 6px 18px;
+    margin-bottom: 14px;
+}
+.conf-card h2 {
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #64748b;
+    margin: 14px 0 6px;
+}
+.conf-pessoa {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid #f1f5f9;
+}
+.conf-pessoa:first-of-type { border-top: none; }
+.conf-iniciais {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #2563eb;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.conf-iniciais.amarelo { background: #fef3c7; color: #b45309; }
+.conf-pessoa-info { flex: 1; }
+.conf-pessoa-info strong { display: block; font-size: 15px; }
+.conf-pessoa-info span { font-size: 12px; color: #64748b; }
+.conf-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #dcfce7;
+    color: #15803d;
+}
+.conf-tag.azul { background: #dbeafe; color: #1d4ed8; }
+
+.conf-detalhe {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+.conf-detalhe:first-of-type { border-top: none; }
+.conf-detalhe span:first-child { color: #64748b; }
+.conf-detalhe span:last-child { font-weight: 600; text-align: right; }
+
+
+.conf-aviso {
+    background: #facc15;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 18px 0;
+}
+.conf-aviso strong { display: block; font-size: 15px; }
+.conf-aviso span { font-size: 12px; color: #854d0e; }
+
+
+.conf-botoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.conf-botao {
+    flex: 1;
+    min-width: 180px;
+    text-align: center;
+    padding: 13px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+.conf-botao.principal { background: #2563eb; color: #fff; }
+.conf-botao.principal:hover { background: #1d4ed8; }
+.conf-botao.secundario { background: #fff; color: #1e3a8a; border-color: #cbd5e1; }
+.conf-botao.secundario:hover { background: #f1f5f9; }
+
+@media (max-width: 560px) {
+    .conf-rota { flex-direction: column; align-items: flex-start; }
+    .conf-numero:first-child { padding-left: 0; }
+}
