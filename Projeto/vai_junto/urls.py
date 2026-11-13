@@ -22,9 +22,13 @@ urlpatterns = [
     path('cadastro/verificar-email/', views.verificar_email, name='verificar_email'),
     path('rotas/', views.rotas, name='rotas'),
     path('rotas/<int:rota_id>/', views.rota_detalhes, name='rota_detalhes'),
+    path('rotas/<int:rota_id>/contatar/', views.contatar, name='contatar'),          # NOVA
     path('usuarios/', views.usuarios, name='usuarios'),
     path('usuarios/<int:usuario_id>/remover/', views.usuario_remover, name='usuario_remover'),
     path('perfil/<int:usuario_id>/', views.perfil, name='perfil'),
+    path('grupos/', views.grupos_rota, name='grupos_rota'),                          # NOVA
     path('grupos/<int:grupo_id>/', views.grupo_detalhes, name='grupo_detalhes'),
     path('caronas/<int:carona_id>/', views.carona_detalhes, name='carona_detalhes'),
+    path('solicitacoes/<int:solicitacao_id>/confirmar/', views.confirmar_solicitacao, name='confirmar_solicitacao'),
+    path('caronas/<int:carona_id>/confirmada/', views.confirmacao_carona, name='confirmacao_carona'),
 ]

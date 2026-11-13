@@ -93,3 +93,184 @@ h1 {
 .btn-contato:hover {
   background-color: #1d4ed8;
 }
+
+
+.gr-hero {
+    background: linear-gradient(135deg, #0f1f4d, #1e3a8a);
+    color: #fff;
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.gr-hero small {
+    color: #93c5fd;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 11px;
+}
+.gr-linha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-weight: 700;
+}
+.gr-selo {
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    color: #fff;
+}
+.gr-selo.o { background: #22c55e; }
+.gr-selo.d { background: #2563eb; }
+.gr-nums {
+    display: flex;
+    gap: 18px;
+    text-align: center;
+}
+.gr-nums strong {
+    display: block;
+    font-size: 22px;
+}
+.gr-nums span {
+    font-size: 12px;
+    color: #93c5fd;
+}
+
+
+.gr-abas {
+    display: inline-flex;
+    background: #e2e8f0;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 16px;
+}
+.gr-aba {
+    border: 0;
+    background: transparent;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+}
+.gr-aba.ativa {
+    background: #fff;
+    color: #0f1f4d;
+}
+.gr-badge {
+    background: #facc15;
+    color: #0f1f4d;
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 12px;
+    margin-left: 6px;
+}
+
+
+.gr-aviso {
+    background: #facc15;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+}
+.gr-aviso strong { display: block; }
+.gr-aviso span {
+    font-size: 12px;
+    color: #854d0e;
+}
+
+
+.gr-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.gr-ini {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #2563eb;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.gr-info {
+    flex: 1;
+    min-width: 160px;
+}
+.gr-info a,
+.gr-info strong {
+    font-weight: 700;
+    color: #0f1f4d;
+    text-decoration: none;
+}
+.gr-info span {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+.gr-tag {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #dcfce7;
+    color: #15803d;
+}
+.gr-tag.cinza { background: #f1f5f9; color: #64748b; }
+.gr-tag.verm  { background: #fee2e2; color: #b91c1c; }
+
+
+.gr-btn {
+    border: 0;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.gr-btn:hover { background: #1d4ed8; }
+.gr-link {
+    font-size: 13px;
+    color: #2563eb;
+    text-decoration: none;
+}
+.gr-link:hover { text-decoration: underline; }
+.gr-form {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.gr-vazio {
+    color: #64748b;
+    text-align: center;
+    padding: 24px 0;
+}
+
+.gr-sair-form { margin-top: 24px; }
+.gr-sair {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 13px;
+    color: #2563eb;
+}
+.gr-sair:hover { text-decoration: underline; }
