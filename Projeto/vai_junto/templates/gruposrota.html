@@ -4,160 +4,240 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>vaijunto</title>
+  <title>Descobrir · VaiJunto</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/gruposrota.css' %}">
+  <link rel="stylesheet" href="{% static 'css/rotas.css' %}">
 </head>
-
-<body>
-<div class="caixa">
-  <h2>vaijunto</h2>
-
-{% if detalhe %}
-  {# ===================== DETALHE DE UM GRUPO ===================== #}
-  <a href="{% url 'rota_detalhes' grupo.rota.id_rota %}">← Voltar à rota</a>
-  <h1>{{ grupo.nome }}</h1>
-  <p class="descricao">{{ grupo.rota.origem }} → {{ grupo.rota.id_instituicao.sigla }}</p>
-
-  <h2>Membros</h2>
-  {% for membro in membros %}
-    <div class="aluno">
-      <div class="info"><a class="nome" href="{% url 'perfil' membro.id_usuario %}">{{ membro.nome }}</a></div>
+<body class="pagina-rotas">
+  <header class="topbar">
+    <a class="marca" href="{% url 'home' %}">
+      <img class="marca-logo" src="{% static 'css/img/logo.png' %}" alt="vaijunto – caronas universitárias">
+    </a>
+    <div class="topbar-acoes">
+      <span class="online"><span></span> Comunidade universitária</span>
+      {% if usuario_logado %}
+        <a class="avatar-topo" href="{% url 'perfil' usuario_logado.id_usuario %}" aria-label="Meu perfil">{% if usuario_logado.foto %}<img src="{{ usuario_logado.foto.url }}" alt="">{% else %}{{ usuario_logado.nome|first|upper }}{% endif %}</a>
+      {% endif %}
     </div>
-  {% empty %}
-    <p>Este grupo ainda não tem membros.</p>
-  {% endfor %}
+  </header>
 
-  <h2>Mensagens</h2>
-  {% for mensagem in mensagens %}
-    <p><strong>{{ mensagem.usuario.nome }}</strong> · {{ mensagem.enviada_em|date:"d/m/Y H:i" }}: {{ mensagem.texto }}</p>
-  {% empty %}
-    <p>Nenhuma mensagem ainda.</p>
-  {% endfor %}
-
-  <p><a href="{% url 'grupos_rota' %}">← Voltar aos grupos</a></p>
-
-{% else %}
- 
-  <section class="gr-hero">
-    <div>
-      <small>SUA ROTA</small>
-      <div class="gr-linha"><span class="gr-selo o">Origem</span> {{ rota.origem }}</div>
-      <div class="gr-linha"><span class="gr-selo d">Destino</span> {{ rota.id_instituicao.sigla }}</div>
-    </div>
-    <div class="gr-nums">
-      <div><strong>{{ matches|length }}</strong><span>estudantes</span></div>
-      <div><strong>{{ rota.vagas }}</strong><span>vagas</span></div>
-    </div>
-  </section>
-
-  <div class="gr-abas">
-    <button type="button" class="gr-aba ativa" data-aba="descobrir">Descobrir</button>
-    <button type="button" class="gr-aba" data-aba="meugrupo">Meu grupo{% if pendentes %}<span class="gr-badge">{{ pendentes }}</span>{% endif %}</button>
-  </div>
-
-
-  <div id="aba-descobrir">
-    {% for m in matches %}
-      <div class="gr-card">
-        <div class="gr-ini">{{ m.id_usuario.nome|first|upper }}</div>
-        <div class="gr-info">
-          <strong>{{ m.id_usuario.nome }}</strong>
-          <span>{{ m.transporte }} · {{ m.horario|time:"H:i" }} · {{ m.origem }}{% if m.mesma_origem %} · mesma origem{% endif %}</span>
-        </div>
-        <a class="gr-link" href="{% url 'perfil' m.id_usuario.id_usuario %}">Ver perfil</a>
-        {% if m.ja_solicitada %}
-          <span class="gr-tag">Enviado</span>
-        {% else %}
-          <form method="post" action="{% url 'contatar' m.id_rota %}">
-            {% csrf_token %}
-            <button type="submit" class="gr-btn">Contatar</button>
-          </form>
-        {% endif %}
+  <main class="rotas-container">
+    <section class="cabecalho-pagina">
+      <div>
+        <span class="sobretitulo">VAIJUNTO · CARONAS UNIVERSITÁRIAS</span>
+        <h1>Encontre sua carona</h1>
+        <p>Confira os estudantes com rotas disponíveis e encontre o melhor horário para você.</p>
       </div>
-    {% empty %}
-      <p class="gr-vazio">Ainda não há estudantes compatíveis com a sua rota.</p>
-    {% endfor %}
-  </div>
+    </section>
 
-  <div id="aba-meugrupo" hidden>
-    {% if pendentes %}
-      <div class="gr-aviso">
-        <strong>Você tem {{ pendentes }} contato{{ pendentes|pluralize }} pendente{{ pendentes|pluralize }}!</strong>
-        <span>Combine horários e pontos de encontro diretamente com seus colegas.</span>
+    <div class="rt-abas">
+      <button type="button" class="rt-aba ativa" data-aba="rotas">Rotas</button>
+      <button type="button" class="rt-aba" data-aba="usuarios">Usuários</button>
+      <button type="button" class="rt-aba" data-aba="grupos">Meus grupos</button>
+      <button type="button" class="rt-aba" data-aba="solicitacoes">Solicitações{% if solicitacoes_pendentes %}<span class="rt-badge">{{ solicitacoes_pendentes }}</span>{% endif %}</button>
+    </div>
+
+    <div id="aba-rotas">
+    {% if usuario_logado.papel != 'dar' %}
+    <form class="busca-rotas" method="get" role="search">
+      <label for="q">Buscar por origem</label>
+      <div class="campo-busca">
+        <span aria-hidden="true">⌕</span>
+        <input id="q" type="search" name="q" value="{{ search_query }}" placeholder="Ex.: Centro, Tijuca">
+        <button type="submit">Buscar</button>
       </div>
+    </form>
     {% endif %}
 
-    {# pedidos que EU recebi como motorista #}
-    {% for s in recebidas %}
-      <div class="gr-card">
-        <div class="gr-ini">{{ s.solicitante.nome|first|upper }}</div>
-        <div class="gr-info">
-          <strong>{{ s.solicitante.nome }}</strong>
-          <span>quer pegar carona em {{ s.rota.origem }} → {{ s.rota.id_instituicao.sigla }}</span>
-        </div>
-        <form class="gr-form" method="post" action="{% url 'confirmar_solicitacao' s.id %}">
-          {% csrf_token %}
-          <input type="date" name="data">
-          <button type="submit" class="gr-btn">Confirmar carona</button>
-        </form>
+    {% if sugestoes_pass %}
+      <div class="lista-cabecalho">
+        <h2>Passageiros com trajeto parecido</h2>
+        <span>{{ sugestoes_pass|length }} pessoa(s)</span>
       </div>
-    {% endfor %}
-
-    {# pedidos que EU enviei #}
-    {% for s in enviadas %}
-      <div class="gr-card">
-        <div class="gr-ini">{{ s.rota.id_usuario.nome|first|upper }}</div>
-        <div class="gr-info">
-          <a href="{% url 'perfil' s.rota.id_usuario.id_usuario %}">{{ s.rota.id_usuario.nome }}</a>
-          <span>{{ s.rota.transporte }} · {{ s.rota.horario|time:"H:i" }} · {{ s.rota.origem }}</span>
-        </div>
-        {% if s.status == 'aceita' %}
-          <span class="gr-tag">Aceito</span>
-          {% if s.rota.grupo %}<a class="gr-link" href="{% url 'grupo_detalhes' s.rota.grupo.id_grupo %}">Ir para o grupo</a>{% endif %}
-        {% elif s.status == 'recusada' %}
-          <span class="gr-tag verm">Recusado</span>
-        {% else %}
-          <span class="gr-tag">Enviado</span>
-        {% endif %}
-      </div>
-    {% endfor %}
-
-    {# grupos dos quais eu faço parte #}
-    {% for g in meus_grupos %}
-      <div class="gr-card">
-        <div class="gr-ini">{{ g.nome|first|upper }}</div>
-        <div class="gr-info">
-          <strong>{{ g.nome }}</strong>
-          <span>{{ g.rota.origem }} → {{ g.rota.id_instituicao.sigla }}</span>
-        </div>
-        <a class="gr-link" href="{% url 'grupo_detalhes' g.id_grupo %}">Abrir grupo</a>
-      </div>
-    {% endfor %}
-
-    {% if not recebidas and not enviadas and not meus_grupos %}
-      <p class="gr-vazio">Você ainda não contatou ninguém. Vá em Descobrir e clique em Contatar.</p>
+      <section class="lista-rotas" aria-label="Passageiros com trajeto parecido com o seu">
+        {% for p in sugestoes_pass %}
+          <div class="rt-item">
+            <a class="rt-ini" href="{% url 'perfil' p.id_usuario.id_usuario %}" aria-label="Ver perfil de {{ p.id_usuario.nome }}">{% if p.id_usuario.foto %}<img src="{{ p.id_usuario.foto.url }}" alt="">{% else %}{{ p.id_usuario.nome|first|upper }}{% endif %}</a>
+            <div class="rt-info">
+              <a class="rt-nome" href="{% url 'perfil' p.id_usuario.id_usuario %}"><strong>{{ p.id_usuario.nome }}</strong></a>
+              <span>{{ p.origem }} → {{ p.id_instituicao.sigla }} · ◷ {% for h in p.horarios.all %}{{ h.get_dia_display }} {{ h.horario|time:"H:i" }}{% if not forloop.last %} · {% endif %}{% empty %}{{ p.horario|time:"H:i" }}{% endfor %}</span>
+            </div>
+            {% if p.oferta_status == 'pendente' %}
+              <span class="rt-status rt-pendente">Oferta enviada</span>
+            {% elif p.oferta_status == 'aceita' %}
+              <span class="rt-status rt-aceita">✓ Oferta aceita</span>
+            {% else %}
+              <form method="post" action="{% url 'ofertar_carona' minha_rota.id_rota p.id_usuario.id_usuario %}">
+                {% csrf_token %}
+                <button type="submit" class="rt-btn">Oferecer carona</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </section>
     {% endif %}
-  </div>
 
-  <form class="gr-sair-form" method="post" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button type="submit" class="gr-sair">Sair</button>
-  </form>
+    {% if sugestoes %}
+      <div class="lista-cabecalho">
+        <h2>Sugestões para o seu trajeto</h2>
+        <span>{{ sugestoes|length }} carona(s)</span>
+      </div>
+      <section class="lista-rotas" aria-label="Sugestões de carona para o seu trajeto">
+        {% for rota in sugestoes %}
+          {% include 'includes-rota-card.html' %}
+        {% endfor %}
+      </section>
+    {% endif %}
 
+    {% if usuario_logado.papel != 'dar' %}
+    <div class="lista-cabecalho">
+      <h2>{% if sugestoes %}Outras rotas{% else %}Rotas disponíveis{% endif %}</h2>
+      <span>{{ rotas|length }} rota(s)</span>
+    </div>
+
+    <section class="lista-rotas" aria-label="Lista de rotas disponíveis">
+      {% for rota in rotas %}
+        {% include 'includes-rota-card.html' %}
+      {% empty %}
+        <div class="estado-vazio">
+          <div class="vazio-icone">⌕</div>
+          <h3>Nenhuma rota encontrada</h3>
+          {% if sugestoes %}
+            <p>Por enquanto só achamos as sugestões ali em cima. Tente buscar por outra origem.</p>
+          {% else %}
+            <p>Não encontramos caronas com esses critérios. Tente buscar por outra origem.</p>
+          {% endif %}
+          <a href="{% url 'rotas' %}">Limpar busca</a>
+        </div>
+      {% endfor %}
+    </section>
+    {% elif not sugestoes_pass %}
+      <div class="estado-vazio">
+        <div class="vazio-icone">◷</div>
+        <h3>Nenhum passageiro com trajeto parecido ainda</h3>
+        <p>Quando alguém tiver um trajeto parecido com o seu, a pessoa aparece aqui pra você oferecer carona.</p>
+      </div>
+    {% endif %}
+    </div>
+
+    <section id="aba-usuarios" hidden aria-label="Usuários">
+      {% for u in outros_usuarios %}
+        <div class="rt-item">
+          <a class="rt-ini" href="{% url 'perfil' u.id_usuario %}" aria-label="Ver perfil de {{ u.nome }}">{{ u.nome|first|upper }}</a>
+          <div class="rt-info">
+            <a class="rt-nome" href="{% url 'perfil' u.id_usuario %}"><strong>{{ u.nome }}</strong></a>
+            <span>{{ u.email }}</span>
+          </div>
+          {% if u.papel == 'dar' %}
+            <span class="rt-tag">Motorista</span>
+          {% elif u.papel == 'pegar' %}
+            <span class="rt-tag rt-tag-azul">Passageiro</span>
+          {% else %}
+            <span class="rt-tag rt-tag-azul">Motorista e passageiro</span>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="rt-vazio">Nenhum outro usuário cadastrado ainda.</p>
+      {% endfor %}
+    </section>
+
+    <section id="aba-grupos" hidden aria-label="Meus grupos">
+      {% for g in meus_grupos_lista %}
+        <div class="rt-item">
+          <span class="rt-ini">{{ g.nome|first|upper }}</span>
+          <div class="rt-info">
+            <strong>{{ g.nome }}</strong>
+            <span>{{ g.rota.origem }} → {{ g.rota.id_instituicao.sigla }}</span>
+          </div>
+          <a class="rt-link" href="{% url 'grupo_chat' g.id_grupo %}">💬 Chat</a>
+        </div>
+      {% empty %}
+        <p class="rt-vazio">Você ainda não participa de nenhum grupo. Solicite uma carona para entrar!</p>
+      {% endfor %}
+    </section>
+
+    <section id="aba-solicitacoes" hidden aria-label="Minhas solicitações">
+      <h3 class="rt-subtitulo">Minhas solicitações para outros</h3>
+      {% for s in minhas_sols %}
+        <div class="rt-item">
+          {% if s.tipo == 'oferta' %}
+            <span class="rt-ini">{{ s.destinatario.nome|first|upper }}</span>
+            <div class="rt-info">
+              <strong>{{ s.rota.origem }} → {{ s.rota.id_instituicao.sigla }}</strong>
+              <span>oferta para {{ s.destinatario.nome }}</span>
+            </div>
+          {% else %}
+            <span class="rt-ini">{{ s.rota.id_usuario.nome|first|upper }}</span>
+            <div class="rt-info">
+              <strong>{{ s.rota.origem }} → {{ s.rota.id_instituicao.sigla }}</strong>
+              <span>com {{ s.rota.id_usuario.nome }}</span>
+            </div>
+          {% endif %}
+          {% if s.status == 'aceita' %}
+            <span class="rt-status rt-aceita">✓ Aceita</span>
+          {% elif s.status == 'recusada' %}
+            <span class="rt-status rt-recusada">Recusada</span>
+          {% else %}
+            <span class="rt-status rt-pendente">Pendente</span>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="rt-vazio">Você ainda não fez nenhuma solicitação de carona.</p>
+      {% endfor %}
+
+      <h3 class="rt-subtitulo">Solicitações para mim</h3>
+      {% for s in sols_recebidas %}
+        <div class="rt-item">
+          {% if s.tipo == 'oferta' %}
+            <span class="rt-ini">{{ s.rota.id_usuario.nome|first|upper }}</span>
+            <div class="rt-info">
+              <strong>{{ s.rota.id_usuario.nome }}</strong>
+              <span>te ofereceu carona em {{ s.rota.origem }} → {{ s.rota.id_instituicao.sigla }}</span>
+            </div>
+          {% else %}
+            <span class="rt-ini">{{ s.solicitante.nome|first|upper }}</span>
+            <div class="rt-info">
+              <strong>{{ s.solicitante.nome }}</strong>
+              <span>quer carona em {{ s.rota.origem }} → {{ s.rota.id_instituicao.sigla }}</span>
+            </div>
+          {% endif %}
+          {% if s.status == 'pendente' %}
+            <form id="rt-conf-{{ s.id }}" method="post" action="{% url 'confirmar_solicitacao' s.id %}">{% csrf_token %}</form>
+            <form id="rt-rec-{{ s.id }}" method="post" action="{% url 'recusar_solicitacao' s.id %}">{% csrf_token %}<input type="hidden" name="next" value="rotas"></form>
+            <div class="rt-acoes">
+              {% if s.tipo == 'pedido' %}<input type="date" name="data" form="rt-conf-{{ s.id }}" aria-label="Data da carona">{% endif %}
+              <button type="submit" form="rt-conf-{{ s.id }}" class="rt-btn">Confirmar</button>
+              <button type="submit" form="rt-rec-{{ s.id }}" class="rt-btn rt-btn-verm">Recusar</button>
+            </div>
+          {% elif s.status == 'aceita' %}
+            <span class="rt-status rt-aceita">✓ Aceita</span>
+          {% else %}
+            <span class="rt-status rt-recusada">Recusada</span>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="rt-vazio">Nenhuma solicitação para você por enquanto.</p>
+      {% endfor %}
+    </section>
+  </main>
+
+  <nav class="nav-inferior" aria-label="Navegação principal">
+    <a href="{% url 'home' %}"><span>⌂</span>Início</a>
+    <a class="ativo" href="{% url 'rotas' %}"><span>⌕</span>Descobrir</a>
+    {% if usuario_logado %}
+      <a href="{% url 'perfil' usuario_logado.id_usuario %}"><span>♟</span>Perfil</a>
+    {% endif %}
+  </nav>
   <script>
- 
-    document.querySelectorAll('.gr-aba').forEach(function (btn) {
+    document.querySelectorAll('.rt-aba').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        document.querySelectorAll('.gr-aba').forEach(function (b) { b.classList.remove('ativa'); });
+        document.querySelectorAll('.rt-aba').forEach(function (b) { b.classList.remove('ativa'); });
         btn.classList.add('ativa');
-        document.getElementById('aba-descobrir').hidden = btn.dataset.aba !== 'descobrir';
-        document.getElementById('aba-meugrupo').hidden = btn.dataset.aba !== 'meugrupo';
+        ['rotas', 'usuarios', 'grupos', 'solicitacoes'].forEach(function (nome) {
+          document.getElementById('aba-' + nome).hidden = btn.dataset.aba !== nome;
+        });
       });
     });
   </script>
-{% endif %}
-
-</div>
 </body>
 </html>

@@ -1,0 +1,40 @@
+{# Card de uma rota no Descobrir: usado na lista geral e nas sugestões. Espera `rota`. #}
+<article class="rota-card">
+  <a class="rota-avatar-link" href="{% url 'perfil' rota.id_usuario.id_usuario %}" aria-label="Ver perfil de {{ rota.id_usuario.nome }}">
+    <span class="rota-avatar">{% if rota.id_usuario.foto %}<img src="{{ rota.id_usuario.foto.url }}" alt="">{% else %}{{ rota.id_usuario.nome|first|upper }}{% endif %}</span>
+  </a>
+  <div class="rota-conteudo">
+    <div class="rota-titulo-linha">
+      <h3><a href="{% url 'perfil' rota.id_usuario.id_usuario %}">{{ rota.id_usuario.nome }}</a></h3>
+      <span class="selo-verificado">✓ Estudante</span>
+    </div>
+    <p class="rota-destino">
+      <a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} <span>→</span> {{ rota.id_instituicao.sigla }}</a>
+    </p>
+    <div class="rota-metadados">
+      <span>🚘 {{ rota.referencia|default:"Ponto de encontro a combinar" }}</span>
+      <span>◷ {% for h in rota.horarios.all %}{{ h.get_dia_display }} {{ h.horario|time:"H:i" }}{% if not forloop.last %} · {% endif %}{% empty %}{{ rota.horario|time:"H:i" }}{% endfor %}</span>
+    </div>
+  </div>
+  <div class="rota-lateral">
+    <span class="vagas">{{ rota.vagas }} {% if rota.vagas == 1 %}vaga{% else %}vagas{% endif %}</span>
+    <a class="ver-rota" href="{% url 'rota_detalhes' rota.id_rota %}">Ver rota <span>→</span></a>
+  </div>
+  {% if usuario_logado and not rota.eh_dono and usuario_logado.papel != 'dar' %}
+    <div class="rota-acao">
+      {% if rota.meu_grupo_id %}
+        <a class="btn-chat-grupo" href="{% url 'grupo_chat' rota.meu_grupo_id %}">💬 Abrir chat do grupo</a>
+      {% elif rota.minha_solicitacao == 'pendente' %}
+        <div class="solicitacao-enviada">✓ Solicitação enviada!</div>
+      {% elif rota.minha_solicitacao == 'aceita' %}
+        <div class="solicitacao-enviada">✓ Solicitação aceita!</div>
+      {% else %}
+        <form class="form-solicitar" method="post" action="{% url 'contatar' rota.id_rota %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="rotas">
+          <button type="submit" class="btn-solicitar">Solicitar carona</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+</article>

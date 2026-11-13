@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from vai_junto import views
@@ -27,8 +29,18 @@ urlpatterns = [
     path('usuarios/<int:usuario_id>/remover/', views.usuario_remover, name='usuario_remover'),
     path('perfil/<int:usuario_id>/', views.perfil, name='perfil'),
     path('grupos/', views.grupos_rota, name='grupos_rota'),                          # NOVA
+    path('conta/papel/', views.mudar_papel, name='mudar_papel'),
     path('grupos/<int:grupo_id>/', views.grupo_detalhes, name='grupo_detalhes'),
     path('caronas/<int:carona_id>/', views.carona_detalhes, name='carona_detalhes'),
+    path('rotas/<int:rota_id>/ofertar/<int:usuario_id>/', views.ofertar_carona, name='ofertar_carona'),
     path('solicitacoes/<int:solicitacao_id>/confirmar/', views.confirmar_solicitacao, name='confirmar_solicitacao'),
+    path('solicitacoes/<int:solicitacao_id>/recusar/', views.recusar_solicitacao, name='recusar_solicitacao'),
+    path('grupos/<int:grupo_id>/chat/', views.grupo_chat, name='grupo_chat'),
     path('caronas/<int:carona_id>/confirmada/', views.confirmacao_carona, name='confirmacao_carona'),
+    path('conta/editar/', views.editar_perfil, name='editar_perfil'),
+    path('perfil/<int:usuario_id>/avaliar/', views.avaliar, name='avaliar'),
 ]
+
+# Serve as fotos de perfil em desenvolvimento (python manage.py runserver)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -23,6 +23,9 @@ class Usuario(models.Model):
     email = models.EmailField(unique=True, db_column='email')
     matricula = models.CharField(max_length=50, db_column='matricula')
     senha = models.CharField(max_length=255, db_column='senha')
+    # pegar = só passageiro | dar = só motorista | ambos = os dois
+    papel = models.CharField(max_length=10, default='ambos', db_column='papel')
+    foto = models.FileField(upload_to='fotos/', null=True, blank=True, db_column='foto')
 
     class Meta:
         managed = True
@@ -55,6 +58,25 @@ class Rota(models.Model):
 
 
 
+class Veiculo(models.Model):
+    '''Veículo de quem dá carona (com vagas) ou preferência de veículo de
+    quem só pega carona (vagas = 0). Um usuário pode ter vários.'''
+    id_veiculo = models.AutoField(primary_key=True, db_column='id_veiculo')
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE,
+                                   db_column='id_usuario', related_name='veiculos')
+    tipo = models.CharField(max_length=20, db_column='tipo')   # Carro, Moto, Bicicleta, Van
+    vagas = models.IntegerField(default=0, db_column='vagas')  # 0 = preferência de passageiro
+
+    class Meta:
+        managed = True
+        db_table = 'veiculo'
+        # sem unique_together: quem é "os dois" pode dirigir Carro (vagas>0)
+        # e também aceitar carona de Carro (vagas=0)
+
+    def __str__(self):
+        return f'{self.tipo} ({self.id_usuario.nome})'
+
+
 class HorarioRota(models.Model):
     """Horário de saída de uma rota em cada dia da semana (0=Seg ... 6=Dom)."""
     DIAS = [(0, 'Seg'), (1, 'Ter'), (2, 'Qua'), (3, 'Qui'), (4, 'Sex'), (5, 'Sáb'), (6, 'Dom')]
@@ -80,6 +102,13 @@ class Solicitacao(models.Model):
                              db_column='id_rota', related_name='solicitacoes')
     solicitante = models.ForeignKey(Usuario, on_delete=models.CASCADE,
                                     db_column='id_solicitante', related_name='solicitacoes')
+    # tipo: 'pedido' = passageiro pede carona ao motorista
+    #       'oferta' = motorista oferece carona a um passageiro (destinatario)
+    tipo = models.CharField(max_length=10, default='pedido', db_column='tipo')
+    destinatario = models.ForeignKey(Usuario, on_delete=models.CASCADE,
+                                     db_column='id_destinatario',
+                                     related_name='ofertas_recebidas',
+                                     null=True, blank=True)
     status = models.CharField(max_length=20, default='pendente')
     criada_em = models.DateTimeField(default=timezone.now)
     respondida_em = models.DateTimeField(null=True, blank=True)
@@ -87,7 +116,6 @@ class Solicitacao(models.Model):
     class Meta:
         managed = True
         db_table = 'solicitacao'
-        unique_together = ('rota', 'solicitante')
         verbose_name_plural = "Solicitações"
 
     def __str__(self):
@@ -151,20 +179,30 @@ class Carona(models.Model):
 
 
 class Avaliacao(models.Model):
+    '''Avaliação de um usuário por outro, num papel específico: como o
+    avaliado foi COMO MOTORISTA ou COMO PASSAGEIRO. Uma por par/papel —
+    avaliar de novo atualiza o voto. A carona é opcional (a avaliação é
+    da pessoa, não de uma viagem específica).'''
+    PAPEIS = [('motorista', 'Como motorista'), ('passageiro', 'Como passageiro')]
+
     id_avaliacao = models.AutoField(primary_key=True)
     carona = models.ForeignKey(Carona, on_delete=models.CASCADE,
-                               db_column='id_carona', related_name='avaliacoes')
+                               db_column='id_carona', related_name='avaliacoes',
+                               null=True, blank=True)
     avaliador = models.ForeignKey(Usuario, on_delete=models.CASCADE,
                                   db_column='id_avaliador', related_name='avaliacoes_feitas')
     avaliado = models.ForeignKey(Usuario, on_delete=models.CASCADE,
                                  db_column='id_avaliado', related_name='avaliacoes_recebidas')
+    papel = models.CharField(max_length=10, choices=PAPEIS, default='motorista',
+                             db_column='papel')
     aprovou = models.BooleanField()
     criada_em = models.DateTimeField(default=timezone.now)
 
     class Meta:
         managed = True
         db_table = 'avaliacao'
+        unique_together = ('avaliador', 'avaliado', 'papel')
         verbose_name_plural = "Avaliações"
 
     def __str__(self):
-        return f"{self.avaliador} avaliou {self.avaliado}"
+        return f"{self.avaliador} avaliou {self.avaliado} ({self.papel})"

@@ -274,3 +274,12 @@ h1 {
     color: #2563eb;
 }
 .gr-sair:hover { text-decoration: underline; }
+.caixa .gr-btn-verm { background: #fee2e2; color: #b91c1c; }
+.caixa .gr-btn-verm:hover { background: #fecaca; color: #b91c1c; }
+.gr-acoes { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+.gr-acoes input[type="date"] { flex: 1 1 100%; }
+.gr-acoes .gr-btn { flex: 1 1 auto; margin-top: 0; min-height: 40px; }
+.gr-acoes .gr-btn-verm { flex: 0 0 auto; padding-left: 18px; padding-right: 18px; }
+.gr-btn-chat { display: inline-block; text-decoration: none; }
+.gr-nome{text-decoration:none;color:inherit;display:block}
+.gr-nome:hover strong{color:#2563eb}

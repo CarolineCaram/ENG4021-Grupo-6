@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editar perfil · vaijunto</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/PerfilDoUsuario.css' %}">
+  <link rel="stylesheet" href="{% static 'css/horarios.css' %}">
+  <link rel="stylesheet" href="{% static 'css/conta_editar.css' %}">
+</head>
+
+<body class="perfil-page">
+
+  <header class="perfil-topbar">
+    <div class="perfil-topbar-inner">
+      <a class="perfil-logo" href="{% url 'home' %}"><img src="{% static 'css/img/logo.png' %}" alt="vaijunto – caronas universitárias"></a>
+      <a class="perfil-back" href="{% url 'perfil' usuario.id_usuario %}" aria-label="Voltar">‹</a>
+      <span class="perfil-topbar-title">Editar perfil</span>
+    </div>
+  </header>
+
+  <main class="perfil-main">
+
+    {% if erro %}
+      <p class="editar-erro">{{ erro }}</p>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" id="form-editar" class="editar-form">
+      {% csrf_token %}
+
+      <section class="perfil-card">
+        <h2>Foto e nome</h2>
+        <div class="editar-bloco">
+          <div class="editar-foto-linha">
+            <div class="editar-avatar" id="avatar-preview">
+              {% if usuario.foto %}
+                <img src="{{ usuario.foto.url }}" alt="Sua foto de perfil">
+              {% else %}
+                <span>{{ usuario.nome|first|upper }}</span>
+              {% endif %}
+            </div>
+            <div class="editar-foto-acoes">
+              <label class="editar-btn-foto" for="foto">Trocar foto</label>
+              <input id="foto" name="foto" type="file" accept="image/*" hidden>
+              <p class="editar-dica">Opcional — aparece no seu perfil e no Descobrir.</p>
+            </div>
+          </div>
+          <label class="editar-label" for="nome">Nome</label>
+          <input class="editar-input" id="nome" name="nome" type="text" value="{{ usuario.nome }}" required>
+        </div>
+      </section>
+
+      {% if usuario.papel != 'dar' %}
+      <section class="perfil-card">
+        <h2>Preferência de veículo</h2>
+        <div class="editar-bloco">
+          <p class="editar-dica editar-dica-topo">Quais veículos você aceita pegar carona? (pode marcar mais de um)</p>
+          <div class="pref-opcoes">
+            <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Carro" {% for v in preferencias %}{% if v.tipo == 'Carro' %}checked{% endif %}{% endfor %}> 🚗 Carro</label>
+            <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Moto" {% for v in preferencias %}{% if v.tipo == 'Moto' %}checked{% endif %}{% endfor %}> 🏍️ Moto</label>
+            <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Bicicleta" {% for v in preferencias %}{% if v.tipo == 'Bicicleta' %}checked{% endif %}{% endfor %}> 🚲 Bicicleta</label>
+            <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Van" {% for v in preferencias %}{% if v.tipo == 'Van' %}checked{% endif %}{% endfor %}> 🚐 Van</label>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      {% if usuario.papel != 'pegar' %}
+      <section class="perfil-card">
+        <h2>Seus veículos e vagas</h2>
+        <div class="editar-bloco">
+          <div id="lista-veiculos">
+            {% for v in veiculos_motorista %}
+            <div class="veiculo-linha">
+              <select name="veiculo_tipo" aria-label="Veículo">
+                <option value="Carro" {% if v.tipo == 'Carro' %}selected{% endif %}>Carro</option>
+                <option value="Moto" {% if v.tipo == 'Moto' %}selected{% endif %}>Moto</option>
+                <option value="Bicicleta" {% if v.tipo == 'Bicicleta' %}selected{% endif %}>Bicicleta</option>
+                <option value="Van" {% if v.tipo == 'Van' %}selected{% endif %}>Van / Micro-ônibus</option>
+              </select>
+              <input type="number" name="veiculo_vagas" min="1" max="4" value="{{ v.vagas }}" aria-label="Vagas">
+              <button type="button" class="btn-remove-veiculo" aria-label="Remover veículo" hidden>×</button>
+            </div>
+            {% empty %}
+            <div class="veiculo-linha">
+              <select name="veiculo_tipo" aria-label="Veículo">
+                <option value="Carro">Carro</option>
+                <option value="Moto">Moto</option>
+                <option value="Bicicleta">Bicicleta</option>
+                <option value="Van">Van / Micro-ônibus</option>
+              </select>
+              <input type="number" name="veiculo_vagas" min="1" max="4" value="2" aria-label="Vagas">
+              <button type="button" class="btn-remove-veiculo" aria-label="Remover veículo" hidden>×</button>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="button" id="btn-add-veiculo">+ Adicionar outro veículo</button>
+          <p class="editar-dica">Carro: máx. 4 vagas · Moto: 1 · Bicicleta: 1 · Van: 8.</p>
+        </div>
+      </section>
+      {% endif %}
+
+      {% if rota %}
+      <section class="perfil-card">
+        <h2>Seu trajeto</h2>
+        <div class="editar-bloco">
+          <label class="editar-label" for="origem">Ponto de origem</label>
+          <input class="editar-input" id="origem" name="origem" type="text" value="{{ rota.origem }}" required>
+          <label class="editar-label" for="instituicao">Destino (instituição)</label>
+          <select class="editar-input" id="instituicao" name="instituicao">
+            {% for inst in instituicoes %}
+              <option value="{{ inst.id_instituicao }}" {% if inst.id_instituicao == rota.id_instituicao_id %}selected{% endif %}>{{ inst.sigla }} — {{ inst.nome }}</option>
+            {% endfor %}
+          </select>
+          <label class="editar-label" for="referencia">Ponto de referência (opcional)</label>
+          <input class="editar-input" id="referencia" name="referencia" type="text" value="{{ rota.referencia|default:'' }}">
+
+          {% include 'includes/horarios.html' %}
+        </div>
+      </section>
+      {% endif %}
+
+      <button type="submit" class="editar-salvar">Salvar alterações</button>
+    </form>
+
+    {% if usuario.papel != 'pegar' %}
+    <a class="perfil-editar" href="{% url 'oferecer_carona' %}">
+      <span>＋ Publicar nova rota</span>
+      <span class="perfil-chevron">›</span>
+    </a>
+    {% endif %}
+
+    <a class="editar-voltar" href="{% url 'perfil' usuario.id_usuario %}">Cancelar e voltar ao perfil</a>
+
+  </main>
+
+  <script>
+    (function () {
+      // Prévia da foto escolhida
+      var inputFoto = document.getElementById('foto');
+      var preview = document.getElementById('avatar-preview');
+      inputFoto.addEventListener('change', function () {
+        if (!inputFoto.files || !inputFoto.files[0]) return;
+        var img = document.createElement('img');
+        img.alt = 'Prévia da nova foto';
+        img.src = URL.createObjectURL(inputFoto.files[0]);
+        preview.innerHTML = '';
+        preview.appendChild(img);
+      });
+
+      // Horário de cada dia só vale quando o dia está marcado
+      document.querySelectorAll('input[name="dias"]').forEach(function (cb) {
+        var hora = document.querySelector('input[name="horario_' + cb.value + '"]');
+        if (!hora) return;
+        function ligar() { hora.disabled = !cb.checked; }
+        cb.addEventListener('change', ligar);
+        ligar();
+      });
+
+      // Várias linhas de veículo (igual ao cadastro)
+      var listaVeiculos = document.getElementById('lista-veiculos');
+      var btnAddVeiculo = document.getElementById('btn-add-veiculo');
+      if (listaVeiculos && btnAddVeiculo) {
+        var LIMITE_VAGAS = { 'Carro': 4, 'Moto': 1, 'Bicicleta': 1, 'Van': 8 };
+        function ajustarLinha(linha) {
+          var sel = linha.querySelector('select');
+          var num = linha.querySelector('input[type="number"]');
+          var limite = LIMITE_VAGAS[sel.value] || 4;
+          num.max = limite;
+          if (parseInt(num.value, 10) > limite) num.value = limite;
+          if (parseInt(num.value, 10) < 1 || !num.value) num.value = 1;
+        }
+        listaVeiculos.addEventListener('change', function (ev) {
+          var linha = ev.target.closest('.veiculo-linha');
+          if (linha) ajustarLinha(linha);
+        });
+        function atualizarBotoesVeiculo() {
+          var linhas = listaVeiculos.querySelectorAll('.veiculo-linha');
+          linhas.forEach(function (l) {
+            l.querySelector('.btn-remove-veiculo').hidden = linhas.length === 1;
+          });
+          btnAddVeiculo.hidden = linhas.length >= 4;
+        }
+        btnAddVeiculo.addEventListener('click', function () {
+          var nova = listaVeiculos.querySelector('.veiculo-linha').cloneNode(true);
+          nova.querySelector('select').value = 'Carro';
+          nova.querySelector('input[type="number"]').value = 2;
+          listaVeiculos.appendChild(nova);
+          atualizarBotoesVeiculo();
+        });
+        listaVeiculos.addEventListener('click', function (ev) {
+          var btn = ev.target.closest('.btn-remove-veiculo');
+          if (!btn) return;
+          btn.closest('.veiculo-linha').remove();
+          atualizarBotoesVeiculo();
+        });
+        listaVeiculos.querySelectorAll('.veiculo-linha').forEach(ajustarLinha);
+        atualizarBotoesVeiculo();
+      }
+    })();
+  </script>
+
+</body>
+</html>

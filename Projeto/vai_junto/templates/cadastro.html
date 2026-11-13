@@ -62,6 +62,18 @@
  
         <div class="painel-etapa" data-painel="4">
           <span class="painel-icone">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5"/><path d="M16 4l4 4m0-4l-4 4"/></svg>
+          </span>
+          <h2>Do seu jeito</h2>
+          <p class="painel-texto">No vaijunto você pode dar carona, pegar carona ou os dois. Você escolhe o que combina com a sua rotina.</p>
+          <ul class="lista-check">
+            <li>Quem dá carona define as vagas</li>
+            <li>Quem pega carona só procura uma rota</li>
+          </ul>
+        </div>
+
+        <div class="painel-etapa" data-painel="5">
+          <span class="painel-icone">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>
           </span>
           <h2>Quase lá!</h2>
@@ -86,6 +98,7 @@
           <span class="barra"></span>
           <span class="barra"></span>
           <span class="barra"></span>
+          <span class="barra"></span>
         </div>
 
         {% if erro %}
@@ -98,7 +111,7 @@
     
           <section class="etapa ativa" data-etapa="1">
             <h1>Criar conta</h1>
-            <p class="sub">Etapa 1 de 4 · Dados de acesso</p>
+            <p class="sub">Etapa 1 de 5 · Dados de acesso</p>
 
             <label for="nome">Nome completo</label>
             <input id="nome" type="text" name="nome" placeholder="Ex: Maria Souza" value="{{ dados.nome }}" required>
@@ -121,7 +134,7 @@
 
           <section class="etapa" data-etapa="2">
             <h1>Confirmar matrícula</h1>
-            <p class="sub">Etapa 2 de 4 · Verificação institucional</p>
+            <p class="sub">Etapa 2 de 5 · Verificação institucional</p>
 
             <label for="instituicao">Instituição de ensino</label>
             <select id="instituicao" name="instituicao" required>
@@ -132,7 +145,7 @@
             </select>
 
             <label for="matricula">Número de matrícula</label>
-            <input id="matricula" type="text" name="matricula" placeholder="Ex: 2023100456" value="{{ dados.matricula }}" required>
+            <input id="matricula" type="text" name="matricula" placeholder="Ex: 2023100456" value="{{ dados.matricula }}" pattern="[0-9]{6,10}" title="Só números, 6 a 10 dígitos" required>
 
             <div class="aviso">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2L1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg>
@@ -146,7 +159,7 @@
   
           <section class="etapa" data-etapa="3">
             <h1>Sua rota</h1>
-            <p class="sub">Etapa 3 de 4 · Origem e horários</p>
+            <p class="sub">Etapa 3 de 5 · Origem e horários</p>
 
             <label for="origem">Ponto de origem</label>
             <input id="origem" type="text" name="origem" placeholder="Seu bairro" value="{{ dados.origem }}" required>
@@ -162,21 +175,75 @@
 
   
           <section class="etapa" data-etapa="4">
+            <h1>O que você vai fazer?</h1>
+            <p class="sub">Etapa 4 de 5 · Seu papel</p>
+
+            <div class="papel-opcoes">
+              <label class="papel-card">
+                <input type="radio" name="papel" value="pegar" {% if dados.papel == "pegar" %}checked{% endif %} required>
+                <span class="papel-icone"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#205bea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.2"/><path d="M5 20c0-3.3 3-5.5 7-5.5s7 2.2 7 5.5"/></svg></span>
+                <span class="papel-texto">
+                  <strong>Vou pegar carona</strong>
+                  <span>Quero encontrar estudantes que passam pelo meu caminho.</span>
+                </span>
+              </label>
+              <label class="papel-card">
+                <input type="radio" name="papel" value="dar" {% if dados.papel == "dar" %}checked{% endif %}>
+                <span class="papel-icone"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#205bea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></span>
+                <span class="papel-texto">
+                  <strong>Vou dar carona</strong>
+                  <span>Tenho veículo e posso levar colegas até a faculdade.</span>
+                </span>
+              </label>
+              <label class="papel-card">
+                <input type="radio" name="papel" value="ambos" {% if dados.papel == "ambos" %}checked{% endif %}>
+                <span class="papel-icone"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#205bea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></span>
+                <span class="papel-texto">
+                  <strong>Os dois</strong>
+                  <span>Às vezes eu dou carona, às vezes eu pego.</span>
+                </span>
+              </label>
+            </div>
+
+            <button type="button" class="btn btn-primario" data-acao="proxima">Continuar →</button>
+            <button type="button" class="btn btn-voltar" data-acao="voltar">← Voltar</button>
+          </section>
+
+          <section class="etapa" data-etapa="5">
             <h1>Como você vai?</h1>
-            <p class="sub">Etapa 4 de 4 · Meio de transporte</p>
+            <p class="sub">Etapa 5 de 5 · Meio de transporte</p>
 
-            <label for="transporte">Meio de transporte</label>
-            <select id="transporte" name="transporte">
-              <option value="Carro" {% if dados.transporte == "Carro" %}selected{% endif %}>Carro</option>
-              <option value="Moto" {% if dados.transporte == "Moto" %}selected{% endif %}>Moto</option>
-              <option value="Passageiro" {% if dados.transporte == "Passageiro" %}selected{% endif %}>Passageiro</option>
-              <option value="Van" {% if dados.transporte == "Van" %}selected{% endif %}>Van / Micro-ônibus</option>
-              <option value="Bicicleta" {% if dados.transporte == "Bicicleta" %}selected{% endif %}>Bicicleta</option>
-            </select>
+            <div id="bloco-transporte">
+              <label>Seus veículos e vagas</label>
+              <div id="lista-veiculos">
+                <div class="veiculo-linha">
+                  <select name="veiculo_tipo" aria-label="Veículo">
+                    <option value="Carro">Carro</option>
+                    <option value="Moto">Moto</option>
+                    <option value="Bicicleta">Bicicleta</option>
+                    <option value="Van">Van / Micro-ônibus</option>
+                  </select>
+                  <input type="number" name="veiculo_vagas" min="1" max="4" value="2" aria-label="Vagas">
+                  <button type="button" class="btn-remove-veiculo" aria-label="Remover veículo" hidden>×</button>
+                </div>
+              </div>
+              <button type="button" id="btn-add-veiculo">+ Adicionar outro veículo</button>
+              <p class="dica-vagas" id="dica-vagas">Carro: máx. 4 vagas · Moto: 1 · Bicicleta: 1 · Van: 8.</p>
+            </div>
 
-            <div id="grupo-vagas">
-              <label for="vagas">Vagas disponíveis</label>
-              <input id="vagas" type="number" name="vagas" min="0" max="8" value="{{ dados.vagas|default:2 }}">
+            <div id="bloco-preferencia" hidden>
+              <label>Quais veículos você aceita pegar carona? <span class="label-leve">(pode marcar mais de um)</span></label>
+              <div class="pref-opcoes">
+                <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Carro"> 🚗 Carro</label>
+                <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Moto"> 🏍️ Moto</label>
+                <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Bicicleta"> 🚲 Bicicleta</label>
+                <label class="pref-chip"><input type="checkbox" name="pref_veiculos" value="Van"> 🚐 Van</label>
+              </div>
+              <p class="msg-erro" id="msg-pref" hidden>Marque pelo menos um veículo que você aceita.</p>
+            </div>
+
+            <div class="aviso-passageiro" id="bloco-passageiro" hidden>
+              🙋 Você escolheu <strong>pegar carona</strong>: marque suas preferências acima e pronto — é só criar a conta e procurar uma rota no Descobrir!
             </div>
 
             <button type="submit" class="btn btn-primario">Criar conta</button>
@@ -199,9 +266,13 @@
       const msgSenha = document.getElementById('msg-senha');
       const email = document.getElementById('email');
       const msgEmail = document.getElementById('msg-email');
-      const transporte = document.getElementById('transporte');
-      const grupoVagas = document.getElementById('grupo-vagas');
-      const vagas = document.getElementById('vagas');
+      const listaVeiculos = document.getElementById('lista-veiculos');
+      const btnAddVeiculo = document.getElementById('btn-add-veiculo');
+      const blocoTransporte = document.getElementById('bloco-transporte');
+      const blocoPreferencia = document.getElementById('bloco-preferencia');
+      const blocoPassageiro = document.getElementById('bloco-passageiro');
+      const msgPref = document.getElementById('msg-pref');
+      const LIMITE_VAGAS = { 'Carro': 4, 'Moto': 1, 'Bicicleta': 1, 'Van': 8 };
       const msgDias = document.getElementById('msg-dias');
       let atual = 1;
 
@@ -231,6 +302,12 @@
           return false;
         }
         if (n === 3) msgDias.hidden = true;
+        if (n === 5 && papelAtual() === 'pegar'
+            && !form.querySelector('input[name="pref_veiculos"]:checked')) {
+          msgPref.hidden = false;
+          return false;
+        }
+        msgPref.hidden = true;
         if (n === 1 && senha.value !== confirmar.value) {
           msgSenha.hidden = false;
           confirmar.focus();
@@ -251,7 +328,7 @@
       });
 
       form.addEventListener('keydown', function (ev) {
-        if (ev.key === 'Enter' && atual < 4 && ev.target.tagName !== 'BUTTON') {
+        if (ev.key === 'Enter' && atual < 5 && ev.target.tagName !== 'BUTTON') {
           ev.preventDefault();
           if (etapaValida(atual)) {
             if (atual === 1) { verificarEmail().then(function (livre) { if (livre) mostrar(2); }); }
@@ -274,13 +351,69 @@
       email.addEventListener('input', function () { msgEmail.hidden = true; });
 
 
-      function ajustarVagas() {
-        const passageiro = transporte.value === 'Passageiro';
-        grupoVagas.hidden = passageiro;
-        if (passageiro) vagas.value = 0;
+      // Limite de vagas por veículo, em cada linha
+      function ajustarLinha(linha) {
+        const sel = linha.querySelector('select');
+        const num = linha.querySelector('input[type="number"]');
+        const limite = LIMITE_VAGAS[sel.value] || 4;
+        num.max = limite;
+        if (parseInt(num.value, 10) > limite) num.value = limite;
+        if (parseInt(num.value, 10) < 1 || !num.value) num.value = 1;
       }
-      transporte.addEventListener('change', ajustarVagas);
-      ajustarVagas();
+      listaVeiculos.addEventListener('change', function (ev) {
+        const linha = ev.target.closest('.veiculo-linha');
+        if (linha) ajustarLinha(linha);
+      });
+
+      // Motorista pode cadastrar mais de um veículo
+      function atualizarBotoesVeiculo() {
+        const linhas = listaVeiculos.querySelectorAll('.veiculo-linha');
+        linhas.forEach(function (l, i) {
+          l.querySelector('.btn-remove-veiculo').hidden = linhas.length === 1;
+        });
+        btnAddVeiculo.hidden = linhas.length >= 4;
+      }
+      btnAddVeiculo.addEventListener('click', function () {
+        const nova = listaVeiculos.querySelector('.veiculo-linha').cloneNode(true);
+        nova.querySelector('select').value = 'Carro';
+        nova.querySelector('input[type="number"]').value = 2;
+        listaVeiculos.appendChild(nova);
+        atualizarBotoesVeiculo();
+      });
+      listaVeiculos.addEventListener('click', function (ev) {
+        const btn = ev.target.closest('.btn-remove-veiculo');
+        if (!btn) return;
+        btn.closest('.veiculo-linha').remove();
+        atualizarBotoesVeiculo();
+      });
+
+      // Papel: motorista cadastra veículos; passageiro marca preferências; os dois fazem os dois
+      function papelAtual() {
+        const marcado = form.querySelector('input[name="papel"]:checked');
+        return marcado ? marcado.value : '';
+      }
+      function ajustarPapel() {
+        const papel = papelAtual();
+        const daCarona = papel === 'dar' || papel === 'ambos';
+        const pegaCarona = papel === 'pegar' || papel === 'ambos';
+        blocoTransporte.hidden = !daCarona;
+        blocoPreferencia.hidden = !pegaCarona;
+        blocoPassageiro.hidden = papel !== 'pegar';
+        listaVeiculos.querySelectorAll('select, input').forEach(function (c) { c.disabled = !daCarona; c.required = daCarona; });
+        btnAddVeiculo.disabled = !daCarona;
+        blocoPreferencia.querySelectorAll('input').forEach(function (c) { c.disabled = !pegaCarona; });
+        if (papel !== 'pegar') msgPref.hidden = true;
+      }
+      form.querySelectorAll('input[name="papel"]').forEach(function (r) {
+        r.addEventListener('change', ajustarPapel);
+      });
+      ajustarPapel();
+      atualizarBotoesVeiculo();
+
+      // etapa 5 não tem botão "próxima": valida no envio (ex.: preferência do passageiro)
+      form.addEventListener('submit', function (ev) {
+        if (!etapaValida(5)) ev.preventDefault();
+      });
     })();
   </script>
 </body>
