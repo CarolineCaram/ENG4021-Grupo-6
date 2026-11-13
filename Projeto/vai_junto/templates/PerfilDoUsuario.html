@@ -4,46 +4,285 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Perfil · vaijunto</title>
+  <title>Meu Perfil · vaijunto</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/PerfilDoUsuario.css' %}">
+  <link rel="stylesheet" href="{% static 'css/perfil.css' %}">
 </head>
 
-<body>
+<body class="perfil-page">
 
-  <div class="caixa">
-    <h2>vaijunto</h2>
-    <a href="{% url 'rotas' %}">← Voltar às rotas</a>
-    <h1>Perfil de {{ usuario.nome }}</h1>
-
-    <div class="dado">
-      <div class="titulo">Nome completo</div>
-      <div class="valor">{{ usuario.nome }}</div>
+  <header class="perfil-topbar">
+    <div class="perfil-topbar-inner">
+      <a class="perfil-logo" href="{% url 'home' %}"><img src="{% static 'css/img/logo.png' %}" alt="vaijunto – caronas universitárias"></a>
+      <a class="perfil-back" href="{% url 'rotas' %}" aria-label="Voltar">‹</a>
+      <span class="perfil-topbar-title">Meu Perfil</span>
     </div>
+  </header>
 
-    <div class="dado">
-      <div class="titulo">Número de matrícula</div>
-      <div class="valor">{{ usuario.matricula }}</div>
-    </div>
+  <main class="perfil-main">
 
-    <div class="dado">
-      <div class="titulo">E-mail</div>
-      <div class="valor">{{ usuario.email }}</div>
-    </div>
+    <section class="perfil-hero">
+      <div class="perfil-avatar">{% if usuario.foto %}<img src="{{ usuario.foto.url }}" alt="Foto de {{ usuario.nome }}">{% else %}{{ usuario.nome|first|upper }}{% endif %}</div>
+      <div class="perfil-hero-info">
+        <h1>{{ usuario.nome }}</h1>
+        <p>{{ usuario.email }}</p>
+        {% if matricula_valida %}
+          <span class="perfil-chip">✓ Matrícula verificada</span>
+        {% else %}
+          <span class="perfil-chip perfil-chip-cinza">Matrícula não verificada</span>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="perfil-card">
+      <h2>Informações acadêmicas</h2>
+      <div class="perfil-row">
+        <span class="perfil-icone">🎓</span>
+        <div class="perfil-row-texto">
+          <span>Instituição</span>
+          <strong>{% if primeira_rota %}{{ primeira_rota.id_instituicao.sigla }}{% else %}—{% endif %}</strong>
+        </div>
+      </div>
+      <div class="perfil-row">
+        <span class="perfil-icone">🆔</span>
+        <div class="perfil-row-texto">
+          <span>Número de matrícula</span>
+          <strong>{{ usuario.matricula }}</strong>
+        </div>
+        {% if matricula_valida %}
+          <span class="perfil-chip-mini">✓ Verificada</span>
+        {% else %}
+          <span class="perfil-chip-mini perfil-chip-mini-cinza">Não verificada</span>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="perfil-card">
+      <h2>Informações de rota</h2>
+      {% for rota in rotas %}
+        {% if not forloop.first %}<hr class="perfil-divisor">{% endif %}
+        <div class="perfil-row">
+          <span class="perfil-icone">📍</span>
+          <div class="perfil-row-texto">
+            <span>Ponto de origem</span>
+            <strong>{{ rota.origem }}</strong>
+          </div>
+        </div>
+        {% if usuario.papel != 'pegar' %}
+        <div class="perfil-row">
+          <span class="perfil-icone">🛣️</span>
+          <div class="perfil-row-texto">
+            <span>Rota</span>
+            <strong><a class="perfil-link" href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a></strong>
+          </div>
+        </div>
+        {% endif %}
+        <div class="perfil-row">
+          <span class="perfil-icone">◷</span>
+          <div class="perfil-row-texto">
+            <span>Horários de saída</span>
+            <strong>{% for h in rota.horarios.all %}{{ h.get_dia_display }} {{ h.horario|time:"H:i" }}{% if not forloop.last %} · {% endif %}{% empty %}{{ rota.horario|time:"H:i" }}{% endfor %}</strong>
+          </div>
+        </div>
+        {% if usuario.papel != 'pegar' %}
+        <div class="perfil-row">
+          <span class="perfil-icone">🚗</span>
+          <div class="perfil-row-texto">
+            <span>{% if veiculos_motorista|length > 1 %}Veículos e vagas{% else %}Meio de transporte{% endif %}</span>
+            <strong>
+              {% if forloop.first and veiculos_motorista %}
+                {% for v in veiculos_motorista %}{{ v.tipo }} · {{ v.vagas }} vaga{% if v.vagas != 1 %}s{% endif %}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+              {% else %}
+                {{ rota.transporte }} · {{ rota.vagas }} vaga{% if rota.vagas != 1 %}s{% endif %}
+              {% endif %}
+            </strong>
+          </div>
+          {% if rota.grupo %}<a class="perfil-chip-grupo" href="{% url 'grupo_detalhes' rota.grupo.id_grupo %}">Ver grupo →</a>{% endif %}
+        </div>
+        {% endif %}
+      {% empty %}
+        <p class="perfil-vazio">Este estudante ainda não publicou uma rota.</p>
+      {% endfor %}
+      {% if preferencias %}
+        <div class="perfil-row">
+          <span class="perfil-icone">🙋</span>
+          <div class="perfil-row-texto">
+            <span>Prefere carona de</span>
+            <strong>{% for v in preferencias %}{{ v.tipo }}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="perfil-stats">
+      <div class="perfil-stat">
+        <strong class="azul">{{ total_caronas }}</strong>
+        <span>caronas</span>
+      </div>
+      <div class="perfil-stat">
+        <strong class="verde">{{ total_grupos }}</strong>
+        <span>no grupo</span>
+      </div>
+      <div class="perfil-stat">
+        <strong class="laranja">{{ aprovacao|default:"—" }}</strong>
+        <span>aprovação</span>
+      </div>
+    </section>
+
+    <section class="perfil-card">
+      <h2>Avaliações</h2>
+      <div class="perfil-row">
+        <div class="perfil-row-texto">
+          <span>Como motorista</span>
+          {% if pct_motorista %}
+            <strong>{{ pct_motorista }} positivas · {{ n_motorista }} avaliaç{{ n_motorista|pluralize:"ão,ões" }}</strong>
+          {% else %}
+            <strong>Nenhuma avaliação</strong>
+          {% endif %}
+        </div>
+      </div>
+      <div class="perfil-row">
+        <div class="perfil-row-texto">
+          <span>Como passageiro</span>
+          {% if pct_passageiro %}
+            <strong>{{ pct_passageiro }} positivas · {{ n_passageiro }} avaliaç{{ n_passageiro|pluralize:"ão,ões" }}</strong>
+          {% else %}
+            <strong>Nenhuma avaliação</strong>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if request.session.usuario_id != usuario.id_usuario %}
+      <div class="aval-form">
+        <h3>Avaliar {{ usuario.nome }}</h3>
+        <div class="aval-linha">
+          <span class="aval-linha-label">Como motorista</span>
+          <form method="post" action="{% url 'avaliar' usuario.id_usuario %}">
+            {% csrf_token %}
+            <input type="hidden" name="papel" value="motorista">
+            <button type="submit" name="voto" value="1" class="aval-btn{% if minhas_avaliacoes.motorista == True %} aval-btn-pos-on{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+              Recomendo
+            </button>
+            <button type="submit" name="voto" value="0" class="aval-btn aval-btn-neg{% if minhas_avaliacoes.motorista == False %} aval-btn-neg-on{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H6.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"></path><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+              Não recomendo
+            </button>
+          </form>
+        </div>
+        <div class="aval-linha">
+          <span class="aval-linha-label">Como passageiro</span>
+          <form method="post" action="{% url 'avaliar' usuario.id_usuario %}">
+            {% csrf_token %}
+            <input type="hidden" name="papel" value="passageiro">
+            <button type="submit" name="voto" value="1" class="aval-btn{% if minhas_avaliacoes.passageiro == True %} aval-btn-pos-on{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+              Recomendo
+            </button>
+            <button type="submit" name="voto" value="0" class="aval-btn aval-btn-neg{% if minhas_avaliacoes.passageiro == False %} aval-btn-neg-on{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H6.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"></path><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+              Não recomendo
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if avaliacoes %}
+      <div class="aval-lista">
+        {% for av in avaliacoes %}
+        <div class="aval-item">
+          <div class="aval-avatar">{% if av.avaliador.foto %}<img src="{{ av.avaliador.foto.url }}" alt="">{% else %}{{ av.avaliador.nome|first|upper }}{% endif %}</div>
+          <div class="aval-texto">
+            <a class="aval-nome" href="{% url 'perfil' av.avaliador.id_usuario %}"><strong>{{ av.avaliador.nome }}</strong></a>
+            <span class="aval-meta">{{ av.get_papel_display|lower }} · {{ av.criada_em|date:"d/m/Y" }}</span>
+          </div>
+          {% if av.aprovou %}
+            <span class="aval-chip aval-pos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+              Recomendo
+            </span>
+          {% else %}
+            <span class="aval-chip aval-neg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H6.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"></path><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+              Não recomendo
+            </span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="perfil-card">
+      <h2>Como outros estudantes me veem</h2>
+      <div class="perfil-mini">
+        <div class="perfil-mini-avatar">{% if usuario.foto %}<img src="{{ usuario.foto.url }}" alt="">{% else %}{{ usuario.nome|first|upper }}{% endif %}</div>
+        <div class="perfil-mini-card">
+          <p class="perfil-mini-nome">
+            {{ usuario.nome }}
+            <span>{% if primeira_rota %}{{ primeira_rota.id_instituicao.sigla }} · {% endif %}{% if matricula_valida %}Mat. verificada ✓{% else %}Mat. não verificada{% endif %}</span>
+          </p>
+          <p class="perfil-mini-rota">
+            {% if primeira_rota %}
+              {{ primeira_rota.origem }} → {{ primeira_rota.id_instituicao.sigla }}{% if usuario.papel != 'pegar' %}{% if veiculos_motorista %} · {% for v in veiculos_motorista %}{{ v.tipo }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %} · {{ primeira_rota.transporte }}{% endif %}{% endif %}
+            {% else %}
+              Ainda sem rota publicada
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </section>
 
     {% if request.session.usuario_id == usuario.id_usuario %}
-      <p><a href="{% url 'oferecer_carona' %}">Publicar nova rota</a></p>
+      <section class="perfil-card">
+        <h2>Tipo de conta</h2>
+        <form class="perfil-papel" method="post" action="{% url 'mudar_papel' %}" id="form-papel">
+          {% csrf_token %}
+          <select name="papel" id="select-papel" data-atual="{{ usuario.papel }}" aria-label="Tipo de conta">
+            <option value="pegar" {% if usuario.papel == 'pegar' %}selected{% endif %}>Só pego carona</option>
+            <option value="dar" {% if usuario.papel == 'dar' %}selected{% endif %}>Só dou carona</option>
+            <option value="ambos" {% if usuario.papel == 'ambos' %}selected{% endif %}>Dou e pego carona</option>
+          </select>
+        </form>
+        <div class="papel-aviso" id="papel-aviso" hidden>
+          <p><strong>Atenção:</strong> ao mudar o tipo de conta, as suas solicitações de carona pendentes (as que você fez e as que recebeu) serão apagadas. Deseja continuar?</p>
+          <div class="papel-aviso-botoes">
+            <button type="submit" form="form-papel" class="papel-continuar">Continuar</button>
+            <button type="button" class="papel-cancelar" id="papel-cancelar">Cancelar</button>
+          </div>
+        </div>
+        <p class="perfil-papel-dica">Motoristas aparecem no Descobrir e recebem solicitações. Passageiros podem solicitar caronas. Se você virar motorista e ainda não tiver rota, a gente te leva pra publicar uma.</p>
+      </section>
+
+      <a class="perfil-editar" href="{% url 'editar_perfil' %}">
+        <span>🖉 Editar perfil</span>
+        <span class="perfil-chevron">›</span>
+      </a>
     {% endif %}
 
-    <h2>Rotas publicadas</h2>
-    {% for rota in rotas %}
-      <p><a href="{% url 'rota_detalhes' rota.id_rota %}">{{ rota.origem }} → {{ rota.id_instituicao.sigla }}</a>
-        · {% for h in rota.horarios.all %}{{ h.get_dia_display }} {{ h.horario|time:"H:i" }}{% if not forloop.last %}, {% endif %}{% empty %}{{ rota.horario|time:"H:i" }}{% endfor %}
-        {% if rota.grupo %} · <a href="{% url 'grupo_detalhes' rota.grupo.id_grupo %}">Grupo</a>{% endif %}</p>
-    {% empty %}
-      <p>Este estudante ainda não publicou rotas.</p>
-    {% endfor %}
-  </div>
+  </main>
+
+  <script>
+    // Aviso antes de mudar o tipo de conta (apaga solicitações pendentes)
+    (function () {
+      var sel = document.getElementById('select-papel');
+      var aviso = document.getElementById('papel-aviso');
+      var cancelar = document.getElementById('papel-cancelar');
+      if (!sel || !aviso) return;
+      sel.addEventListener('change', function () {
+        aviso.hidden = sel.value === sel.dataset.atual;
+      });
+      cancelar.addEventListener('click', function () {
+        sel.value = sel.dataset.atual;
+        aviso.hidden = true;
+      });
+    })();
+  </script>
 
 </body>
 </html>

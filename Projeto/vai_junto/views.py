@@ -2,11 +2,12 @@ from functools import wraps
 from datetime import date, datetime
 from django.utils import timezone
 
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from vai_junto.models import (Usuario, Rota, Grupo, Carona, Instituicao,
-                              HorarioRota, Solicitacao)
+                              HorarioRota, Solicitacao, Mensagem, Veiculo, Avaliacao)
 
 
 # ---------------------------------------------------------------
@@ -116,7 +117,47 @@ def logout_view(request):
 
 
 def recuperar_senha(request):
-    return render(request, 'recuperar_senha.html')
+    '''Esqueci minha senha: etapa 1 confere e-mail + matrícula;
+    etapa 2 grava a nova senha e manda pro login.'''
+    erro = None
+    etapa = 2 if request.session.get('recuperar_usuario_id') else 1
+
+    if request.method == 'POST':
+        d = request.POST
+        if d.get('etapa') == '2':
+            usuario = Usuario.objects.filter(
+                id_usuario=request.session.get('recuperar_usuario_id')).first()
+            senha = d.get('senha', '')
+            if not usuario:
+                request.session.pop('recuperar_usuario_id', None)
+                erro = 'Sua sessão expirou. Confirme seu e-mail e matrícula de novo.'
+                etapa = 1
+            elif len(senha) < 8:
+                erro = 'A senha precisa ter pelo menos 8 caracteres.'
+            elif senha != d.get('confirmar', ''):
+                erro = 'As senhas não conferem.'
+            else:
+                usuario.senha = make_password(senha)
+                usuario.save()
+                request.session.pop('recuperar_usuario_id', None)
+                return redirect('login')
+        else:
+            email = d.get('email', '').strip()
+            matricula = d.get('matricula', '').strip()
+            usuario = Usuario.objects.filter(email__iexact=email,
+                                             matricula=matricula).first()
+            if usuario:
+                request.session['recuperar_usuario_id'] = usuario.id_usuario
+                etapa = 2
+            else:
+                erro = 'E-mail e matrícula não conferem com nenhuma conta.'
+                etapa = 1
+
+    return render(request, 'recuperar_senha.html', {
+        'erro': erro,
+        'etapa': etapa,
+        'dados': request.POST if request.method == 'POST' else {},
+    })
 
 def verificacao(request):
     return render(request, 'verificacao.html')
@@ -164,10 +205,11 @@ def oferecer_carona(request):
             erro = 'Selecione uma instituição válida.'
         elif not horarios:
             erro = 'Escolha pelo menos um dia e informe o horário de saída de cada dia marcado.'
-        elif not 1 <= vagas <= 8:
-            erro = 'Informe entre 1 e 8 vagas.'
         elif dados.get('transporte') not in {'Carro', 'Moto', 'Van'}:
             erro = 'Selecione um meio de transporte válido.'
+        elif not 1 <= vagas <= {'Carro': 4, 'Moto': 1, 'Van': 8}[dados.get('transporte')]:
+            limite = {'Carro': 4, 'Moto': 1, 'Van': 8}[dados.get('transporte')]
+            erro = '%s permite no máximo %d vaga(s).' % (dados.get('transporte'), limite)
         else:
             criar_rota(
                 horarios,
@@ -178,6 +220,14 @@ def oferecer_carona(request):
                 transporte=dados.get('transporte', 'Carro'),
                 vagas=vagas,
             )
+            # o veículo usado na rota entra (ou atualiza) na lista de veículos dele
+            Veiculo.objects.update_or_create(
+                id_usuario=usuario, tipo=dados.get('transporte'),
+                defaults={'vagas': vagas})
+            # passageiro que publica uma rota passa a dar carona também
+            if usuario.papel == 'pegar':
+                usuario.papel = 'ambos'
+                usuario.save(update_fields=['papel'])
             return redirect('rotas')
 
     return render(request, 'OferecerCarona.html', {
@@ -209,6 +259,8 @@ def cadastro(request):
 
         if not nome or not email or not matricula:
             erro = 'Preencha nome, e-mail e matrícula.'
+        elif not matricula.isdigit() or not 6 <= len(matricula) <= 10:
+            erro = 'A matrícula deve ter só números (6 a 10 dígitos).'
         elif len(senha) < 8:
             erro = 'A senha precisa ter pelo menos 8 caracteres.'
         elif senha != confirmar:
@@ -218,25 +270,74 @@ def cadastro(request):
         elif Usuario.objects.filter(matricula=matricula).exists():
             erro = 'Esta matrícula já está cadastrada.'
         else:
-            usuario = Usuario.objects.create(nome=nome, email=email, matricula=matricula,
-                                             senha=make_password(senha))
-
-            # Etapas "Minha rota" e "Meio de transporte": só cria a Rota se vierem preenchidas
+            # a rota é pré-requisito: valida TUDO do trajeto antes de criar a conta
             inst_id = d.get('instituicao', '')
             instituicao = Instituicao.objects.filter(pk=inst_id).first() if inst_id.isdigit() else None
             origem = d.get('origem', '').strip()
             horarios = ler_horarios(d)   # um horário por dia da semana marcado
-            if instituicao and origem and horarios:
-                vagas = d.get('vagas', '')
+            if not instituicao:
+                erro = 'Escolha sua instituição.'
+            elif not origem:
+                erro = 'Preencha seu ponto de origem (bairro).'
+            elif not horarios:
+                erro = 'Marque pelo menos um dia da semana com um horário válido.'
+            else:
+                papel = d.get('papel', 'ambos')
+                if papel not in ('pegar', 'dar', 'ambos'):
+                    papel = 'ambos'
+                usuario = Usuario.objects.create(nome=nome, email=email, matricula=matricula,
+                                                 senha=make_password(senha), papel=papel)
+
+                LIMITE_VAGAS = {'Carro': 4, 'Moto': 1, 'Bicicleta': 1, 'Van': 8}
+
+                # Preferência de veículo de quem pega carona (pode marcar vários)
+                if papel in ('pegar', 'ambos'):
+                    for tipo in d.getlist('pref_veiculos'):
+                        if tipo in LIMITE_VAGAS:
+                            Veiculo.objects.get_or_create(
+                                id_usuario=usuario, tipo=tipo, defaults={'vagas': 0})
+
+                if papel in ('dar', 'ambos'):
+                    # veículos do motorista: tipo + vagas por linha (vários permitidos)
+                    tipos = [t for t in d.getlist('veiculo_tipo') if t in LIMITE_VAGAS]
+                    numeros = d.getlist('veiculo_vagas')
+                    vistos = set()
+                    veiculos = []
+                    for i, tipo in enumerate(tipos):
+                        if tipo in vistos:
+                            continue
+                        vistos.add(tipo)
+                        limite = LIMITE_VAGAS[tipo]
+                        txt = numeros[i] if i < len(numeros) else ''
+                        n = int(txt) if txt.isdigit() else limite
+                        veiculos.append((tipo, max(1, min(n, limite))))
+                    if not veiculos:
+                        # compatibilidade com o formulário antigo (um transporte só)
+                        tipo = d.get('transporte', '') or 'Carro'
+                        if tipo not in LIMITE_VAGAS:
+                            tipo = 'Carro'
+                        limite = LIMITE_VAGAS[tipo]
+                        txt = d.get('vagas', '')
+                        n = int(txt) if txt.isdigit() else limite
+                        veiculos = [(tipo, max(1, min(n, limite)))]
+                    for tipo, n in veiculos:
+                        Veiculo.objects.create(id_usuario=usuario, tipo=tipo, vagas=n)
+                    transporte, vagas = veiculos[0]
+                else:
+                    # passageiro: a rota guarda o trajeto dele (origem/horários),
+                    # usado nas sugestões; não aparece no Descobrir
+                    prefs = [t for t in d.getlist('pref_veiculos') if t in LIMITE_VAGAS]
+                    transporte = prefs[0] if prefs else 'A combinar'
+                    vagas = 0
                 criar_rota(
                     horarios,
                     id_usuario=usuario, id_instituicao=instituicao, origem=origem,
                     referencia=d.get('referencia', '').strip() or None,
-                    transporte=d.get('transporte', '') or 'passageiro',
-                    vagas=int(vagas) if vagas.isdigit() else 0)
+                    transporte=transporte,
+                    vagas=vagas)
 
-            request.session['usuario_id'] = usuario.id_usuario
-            return redirect('rotas')
+                request.session['usuario_id'] = usuario.id_usuario
+                return redirect('rotas')
 
     return render(request, 'cadastro.html', {
         'erro': erro,
@@ -252,11 +353,88 @@ def rotas(request):
     if not usuario:
         return redirect('login')
     q = request.GET.get('q', '')
-    lista = Rota.objects.select_related('id_usuario', 'id_instituicao')
-    if q:
-        lista = lista.filter(origem__icontains=q)
-    return render(request, 'rotas.html', {'rotas': lista, 'search_query': q,
-                                          'usuario_logado': usuario})
+    if usuario.papel == 'dar':
+        # quem é só motorista não vê a lista "Rotas disponíveis",
+        # só a seção "Passageiros com trajeto parecido"
+        lista = []
+    else:
+        lista = list(Rota.objects.select_related('id_usuario', 'id_instituicao'))
+        # o usuário logado nunca vê as próprias rotas no Descobrir,
+        # e só aparecem rotas de quem DÁ carona (motorista ou os dois)
+        lista = [r for r in lista
+                 if r.id_usuario_id != usuario.id_usuario
+                 and r.id_usuario.papel in ('dar', 'ambos')]
+        if q:
+            lista = [r for r in lista if q.lower() in r.origem.lower()]
+
+    # Em cada card: eu sou o dono? já pedi carona? já estou no grupo?
+    minhas_solicitacoes = {s.rota_id: s.status
+                           for s in Solicitacao.objects.filter(solicitante=usuario)}
+    meus_grupos = {g.rota_id: g.id_grupo for g in usuario.grupos.all()}
+    for r in lista:
+        r.eh_dono = r.id_usuario_id == usuario.id_usuario
+        r.minha_solicitacao = minhas_solicitacoes.get(r.id_rota)
+        r.meu_grupo_id = meus_grupos.get(r.id_rota)
+
+    # Sugestões pelo trajeto da pessoa (mesma instituição, horário próximo,
+    # mesma origem primeiro):
+    # - passageiro: caronas compatíveis, que saem da lista geral para não repetir
+    # - motorista: passageiros compatíveis, para quem ele pode oferecer carona
+    sugestoes = []
+    sugestoes_pass = []
+    minha_rota = ultima_rota(usuario)
+    if minha_rota and usuario.papel == 'pegar':
+        sugestoes = [m for m in buscar_matches(minha_rota)
+                     if m.id_usuario.papel in ('dar', 'ambos')]
+        for m in sugestoes:
+            m.eh_dono = False
+            m.minha_solicitacao = minhas_solicitacoes.get(m.id_rota)
+            m.meu_grupo_id = meus_grupos.get(m.id_rota)
+        ids = {m.id_rota for m in sugestoes}
+        lista = [r for r in lista if r.id_rota not in ids]
+    elif minha_rota and usuario.papel in ('dar', 'ambos'):
+        ofertas = {s.destinatario_id: s.status
+                   for s in Solicitacao.objects.filter(rota=minha_rota, tipo='oferta')}
+        sugestoes_pass = [m for m in buscar_matches(minha_rota)
+                          if m.id_usuario.papel in ('pegar', 'ambos')]
+        for m in sugestoes_pass:
+            m.oferta_status = ofertas.get(m.id_usuario_id)
+    # Abas: usuários (menos eu), meus grupos e minhas solicitações
+    outros_usuarios = (Usuario.objects.exclude(pk=usuario.pk)
+                       .order_by('nome'))
+    meus_grupos_lista = (usuario.grupos
+                         .select_related('rota', 'rota__id_instituicao')
+                         .order_by('nome'))
+    minhas_sols = list(Solicitacao.objects
+                       .filter(solicitante=usuario)
+                       .select_related('rota', 'rota__id_usuario',
+                                       'rota__id_instituicao')
+                       .order_by('-criada_em'))
+    # Solicitações PARA MIM: motorista recebe pedidos; passageiro recebe ofertas
+    sols_recebidas = []
+    if usuario.papel in ('dar', 'ambos'):
+        sols_recebidas += list(Solicitacao.objects
+                               .filter(rota__id_usuario=usuario, tipo='pedido')
+                               .select_related('solicitante', 'rota',
+                                               'rota__id_instituicao'))
+    if usuario.papel in ('pegar', 'ambos'):
+        sols_recebidas += list(Solicitacao.objects
+                               .filter(destinatario=usuario, tipo='oferta')
+                               .select_related('solicitante', 'rota',
+                                               'rota__id_instituicao'))
+    sols_recebidas.sort(key=lambda s: s.criada_em, reverse=True)
+    pendentes = (sum(1 for s in minhas_sols if s.status == 'pendente')
+                 + sum(1 for s in sols_recebidas if s.status == 'pendente'))
+    return render(request, 'rotas.html', {
+        'rotas': lista, 'search_query': q, 'usuario_logado': usuario,
+        'sugestoes': sugestoes,
+        'sugestoes_pass': sugestoes_pass,
+        'minha_rota': minha_rota,
+        'outros_usuarios': outros_usuarios,
+        'meus_grupos_lista': meus_grupos_lista,
+        'minhas_sols': minhas_sols,
+        'sols_recebidas': sols_recebidas,
+        'solicitacoes_pendentes': pendentes})
 
 def rota_detalhes(request, rota_id):
     rota = get_object_or_404(Rota, id_rota=rota_id)
@@ -265,8 +443,13 @@ def rota_detalhes(request, rota_id):
 
 
 def usuarios(request):
+    '''Lista os usuários cadastrados, sem mostrar o próprio usuário logado.'''
+    lista = Usuario.objects.all()
+    uid = request.session.get('usuario_id')
+    if uid:
+        lista = lista.exclude(pk=uid)
     return render(request, 'listar_usuarios.html',
-                  {'usuarios': Usuario.objects.all()})
+                  {'usuarios': lista})
 
 
 def usuario_remover(request, usuario_id):
@@ -285,9 +468,146 @@ def usuario_remover(request, usuario_id):
 
 def perfil(request, usuario_id):
     usuario = get_object_or_404(Usuario, id_usuario=usuario_id)
+    rotas = usuario.rotas.all()
+    # caronas = viagens em grupo da rota dele + caronas em que foi passageiro
+    total_caronas = (Carona.objects.filter(rota__id_usuario=usuario).count()
+                     + usuario.caronas_como_passageiro.count())
+    recebidas = list(usuario.avaliacoes_recebidas
+                     .select_related('avaliador').order_by('-criada_em'))
+
+    def pct(avs):
+        n = len(avs)
+        return ('%d%%' % round(100 * sum(1 for a in avs if a.aprovou) / n)) if n else None
+
+    av_motorista = [a for a in recebidas if a.papel == 'motorista']
+    av_passageiro = [a for a in recebidas if a.papel == 'passageiro']
+    aprovacao = pct(recebidas)
+    veiculos = list(usuario.veiculos.all())
+    # votos que o visitante logado já deu nesse perfil (pra marcar os botões)
+    minhas_avaliacoes = {}
+    uid = request.session.get('usuario_id')
+    if uid and uid != usuario.id_usuario:
+        minhas_avaliacoes = {a.papel: a.aprovou for a in
+                             Avaliacao.objects.filter(avaliador_id=uid, avaliado=usuario)}
     return render(request, 'PerfilDoUsuario.html', {
         'usuario': usuario,
-        'rotas': usuario.rotas.all(),
+        'rotas': rotas,
+        'primeira_rota': rotas.first(),
+        'total_caronas': total_caronas,
+        'total_grupos': usuario.grupos.count(),
+        'aprovacao': aprovacao,
+        # avaliações separadas por papel (None = nenhuma avaliação)
+        'avaliacoes': recebidas[:10],
+        'pct_motorista': pct(av_motorista), 'n_motorista': len(av_motorista),
+        'pct_passageiro': pct(av_passageiro), 'n_passageiro': len(av_passageiro),
+        'minhas_avaliacoes': minhas_avaliacoes,
+        # vagas > 0: veículos do motorista · vagas = 0: preferências do passageiro
+        'veiculos_motorista': [v for v in veiculos if v.vagas > 0],
+        'preferencias': [v for v in veiculos if v.vagas == 0],
+        # selo de matrícula verificada só aparece se o número passa na validação
+        'matricula_valida': usuario.matricula.isdigit() and 6 <= len(usuario.matricula) <= 10,
+    })
+
+
+@login_necessario
+def avaliar(request, usuario_id):
+    '''Avalia um usuário como motorista ou passageiro (recomendo / não recomendo).
+    Avaliar de novo no mesmo papel atualiza o voto. Ninguém se autoavalia.'''
+    avaliado = get_object_or_404(Usuario, id_usuario=usuario_id)
+    if request.method == 'POST' and avaliado != request.usuario:
+        papel = request.POST.get('papel', '')
+        voto = request.POST.get('voto', '')
+        if papel in ('motorista', 'passageiro') and voto in ('1', '0'):
+            Avaliacao.objects.update_or_create(
+                avaliador=request.usuario, avaliado=avaliado, papel=papel,
+                defaults={'aprovou': voto == '1'})
+    return redirect('perfil', usuario_id=usuario_id)
+
+
+@login_necessario
+def editar_perfil(request):
+    '''Edição do próprio perfil: nome, foto, preferências/veículos e trajeto.
+    O trajeto atualiza a rota mais recente; rota nova é pelo "Publicar nova rota".'''
+    usuario = request.usuario
+    LIMITE_VAGAS = {'Carro': 4, 'Moto': 1, 'Bicicleta': 1, 'Van': 8}
+    erro = None
+    if request.method == 'POST':
+        d = request.POST
+        nome = d.get('nome', '').strip()
+        if not nome:
+            erro = 'Informe o seu nome.'
+        else:
+            usuario.nome = nome
+            if request.FILES.get('foto'):
+                usuario.foto = request.FILES['foto']
+            usuario.save()
+
+            # Preferência de veículo de quem pega carona (vagas = 0)
+            if usuario.papel in ('pegar', 'ambos'):
+                Veiculo.objects.filter(id_usuario=usuario, vagas=0).delete()
+                for tipo in d.getlist('pref_veiculos'):
+                    if tipo in LIMITE_VAGAS:
+                        Veiculo.objects.get_or_create(
+                            id_usuario=usuario, tipo=tipo, vagas=0)
+
+            # Veículos de quem dá carona (vagas > 0), vários permitidos
+            primeiro_veiculo = None
+            if usuario.papel in ('dar', 'ambos'):
+                Veiculo.objects.filter(id_usuario=usuario, vagas__gt=0).delete()
+                tipos = [t for t in d.getlist('veiculo_tipo') if t in LIMITE_VAGAS]
+                numeros = d.getlist('veiculo_vagas')
+                vistos = set()
+                for i, tipo in enumerate(tipos):
+                    if tipo in vistos:
+                        continue
+                    vistos.add(tipo)
+                    limite = LIMITE_VAGAS[tipo]
+                    txt = numeros[i] if i < len(numeros) else ''
+                    n = max(1, min(int(txt) if txt.isdigit() else limite, limite))
+                    Veiculo.objects.create(id_usuario=usuario, tipo=tipo, vagas=n)
+                    if primeiro_veiculo is None:
+                        primeiro_veiculo = (tipo, n)
+
+            # Trajeto: edita a rota mais recente no lugar
+            rota = ultima_rota(usuario)
+            if rota:
+                origem = d.get('origem', '').strip()
+                if origem:
+                    rota.origem = origem
+                inst_id = d.get('instituicao', '')
+                if inst_id.isdigit():
+                    instituicao = Instituicao.objects.filter(pk=inst_id).first()
+                    if instituicao:
+                        rota.id_instituicao = instituicao
+                rota.referencia = d.get('referencia', '').strip() or None
+                horarios = ler_horarios(d)
+                if horarios:
+                    rota.horario = min(h for _, h in horarios)
+                    rota.horarios.all().delete()
+                    HorarioRota.objects.bulk_create(
+                        [HorarioRota(rota=rota, dia=dia, horario=h)
+                         for dia, h in horarios])
+                # mantém o campo antigo da rota em sincronia com o 1º veículo
+                if primeiro_veiculo:
+                    rota.transporte, rota.vagas = primeiro_veiculo
+                rota.save()
+            return redirect('perfil', usuario_id=usuario.id_usuario)
+
+    rota = ultima_rota(usuario)
+    horarios_rota = ({h.dia: h.horario.strftime('%H:%M')
+                      for h in rota.horarios.all()} if rota else {})
+    veiculos = list(usuario.veiculos.all())
+    return render(request, 'conta_editar.html', {
+        'usuario': usuario,
+        'erro': erro,
+        'rota': rota,
+        'instituicoes': Instituicao.objects.all(),
+        'dias': [{'n': n, 'nome': nome_dia,
+                  'marcado': n in horarios_rota,
+                  'horario': horarios_rota.get(n, '')}
+                 for n, nome_dia in HorarioRota.DIAS],
+        'veiculos_motorista': [v for v in veiculos if v.vagas > 0],
+        'preferencias': [v for v in veiculos if v.vagas == 0],
     })
 
 
@@ -315,23 +635,30 @@ def grupos_rota(request):
     '''Etapa 7: estudantes compatíveis (Descobrir) e contatos (Meu grupo).'''
     usuario = request.usuario
     rota = ultima_rota(usuario)
-    if not rota:
-        return redirect('oferecer_carona')
+    pode_dirigir = usuario.papel in ('dar', 'ambos')
+    pode_solicitar = usuario.papel != 'dar'
 
     enviadas = (Solicitacao.objects.filter(solicitante=usuario)
                 .select_related('rota__id_usuario', 'rota__id_instituicao')
                 .order_by('-criada_em'))
     ja_solicitadas = {s.rota_id for s in enviadas}
 
-    matches = buscar_matches(rota)
+    matches = buscar_matches(rota) if rota else []
+    matches = [m for m in matches if m.id_usuario.papel in ('dar', 'ambos')]
     for m in matches:
         m.ja_solicitada = m.id_rota in ja_solicitadas
 
-    recebidas = (Solicitacao.objects
-                 .filter(rota__id_usuario=usuario, status='pendente')
-                 .select_related('solicitante', 'rota__id_instituicao'))
+    # aceitar/recusar solicitações é só de quem dá carona (só pedidos;
+    # ofertas que ele enviou aparecem nas enviadas)
+    if pode_dirigir:
+        recebidas = (Solicitacao.objects
+                     .filter(rota__id_usuario=usuario, status='pendente',
+                             tipo='pedido')
+                     .select_related('solicitante', 'rota__id_instituicao'))
+    else:
+        recebidas = []
 
-    pendentes = sum(1 for s in enviadas if s.status == 'pendente') + recebidas.count()
+    pendentes = sum(1 for s in enviadas if s.status == 'pendente') + len(recebidas)
 
     return render(request, 'gruposrota.html', {
         'detalhe': False,
@@ -342,16 +669,110 @@ def grupos_rota(request):
         'pendentes': pendentes,
         'meus_grupos': usuario.grupos.select_related('rota__id_instituicao'),
         'usuario_logado': usuario,
+        'pode_dirigir': pode_dirigir,
+        'pode_solicitar': pode_solicitar,
     })
 
 
 @login_necessario
+def mudar_papel(request):
+    '''Troca o tipo de conta (só pego / só dou / os dois). Ao trocar, apaga as
+    solicitações PENDENTES da pessoa (feitas, recebidas e ofertas) — não faria
+    sentido virar motorista e continuar com pedido de carona em aberto.
+    O aviso de confirmação (continuar/cancelar) fica no template do perfil.
+    Se a pessoa passou a dar carona e ainda não tem rota, manda publicar a rota.'''
+    usuario = request.usuario
+    if request.method == 'POST':
+        papel = request.POST.get('papel', '')
+        if papel in ('pegar', 'dar', 'ambos') and papel != usuario.papel:
+            Solicitacao.objects.filter(
+                Q(solicitante=usuario) | Q(destinatario=usuario) | Q(rota__id_usuario=usuario),
+                status='pendente').delete()
+            usuario.papel = papel
+            usuario.save(update_fields=['papel'])
+    if usuario.papel in ('dar', 'ambos') and not usuario.rotas.exists():
+        return redirect('oferecer_carona')
+    return redirect('perfil', usuario_id=usuario.id_usuario)
+
+
+@login_necessario
 def contatar(request, rota_id):
-    '''Botão "Contatar": registra o pedido para pegar carona naquela rota.'''
+    '''Botão "Solicitar carona": registra o pedido para pegar carona naquela rota.
+    Ninguém pode solicitar a própria rota.'''
     rota = get_object_or_404(Rota, id_rota=rota_id)
-    if request.method == 'POST' and rota.id_usuario_id != request.usuario.pk:
-        Solicitacao.objects.get_or_create(rota=rota, solicitante=request.usuario)
+    if rota.id_usuario_id == request.usuario.pk:
+        return redirect('rotas')
+    if request.usuario.papel == 'dar':
+        # quem é só motorista não pede carona
+        return redirect('rotas')
+    if request.method == 'POST':
+        sol, criada = Solicitacao.objects.get_or_create(
+            rota=rota, solicitante=request.usuario, tipo='pedido')
+        if not criada and sol.status == 'recusada':
+            # pediu de novo depois de recusado: volta a ficar pendente
+            sol.status = 'pendente'
+            sol.respondida_em = None
+            sol.save()
+    if request.POST.get('next') == 'rotas':
+        return redirect('rotas')
     return redirect('grupos_rota')
+
+
+@login_necessario
+def ofertar_carona(request, rota_id, usuario_id):
+    '''Botão "Oferecer carona": o dono da rota oferece a carona diretamente
+    para um passageiro. Espelho do contatar (que é do passageiro).'''
+    rota = get_object_or_404(Rota, id_rota=rota_id)
+    alvo = get_object_or_404(Usuario, id_usuario=usuario_id)
+    if (rota.id_usuario_id != request.usuario.pk
+            or request.usuario.papel == 'pegar'
+            or alvo.pk == request.usuario.pk
+            or alvo.papel == 'dar'):
+        return redirect('rotas')
+    if request.method == 'POST':
+        sol, criada = Solicitacao.objects.get_or_create(
+            rota=rota, tipo='oferta', destinatario=alvo,
+            defaults={'solicitante': request.usuario})
+        if not criada and sol.status == 'recusada':
+            # ofereceu de novo depois de recusado: volta a ficar pendente
+            sol.status = 'pendente'
+            sol.respondida_em = None
+            sol.save()
+    return redirect('rotas')
+
+
+@login_necessario
+def recusar_solicitacao(request, solicitacao_id):
+    '''O motorista recusa um pedido pendente.'''
+    sol = get_object_or_404(Solicitacao, pk=solicitacao_id)
+    autorizado = (sol.rota.id_usuario_id == request.usuario.pk
+                  or (sol.tipo == 'oferta'
+                      and sol.destinatario_id == request.usuario.pk))
+    if request.method == 'POST' and autorizado and sol.status == 'pendente':
+        sol.status = 'recusada'
+        sol.respondida_em = timezone.now()
+        sol.save()
+    if request.POST.get('next') == 'rotas':
+        return redirect('rotas')
+    return redirect('grupos_rota')
+
+
+@login_necessario
+def grupo_chat(request, grupo_id):
+    '''Chat do grupo: só quem é membro vê e manda mensagens.'''
+    grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
+    if not grupo.usuarios.filter(pk=request.usuario.pk).exists():
+        return redirect('grupos_rota')
+    if request.method == 'POST':
+        texto = request.POST.get('texto', '').strip()
+        if texto:
+            Mensagem.objects.create(grupo=grupo, usuario=request.usuario, texto=texto)
+        return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+    return render(request, 'chat.html', {
+        'grupo': grupo,
+        'mensagens': grupo.mensagens.select_related('usuario'),
+        'usuario_logado': request.usuario,
+    })
 
 
 @login_necessario
@@ -359,8 +780,14 @@ def confirmar_solicitacao(request, solicitacao_id):
     '''O motorista aceita um pedido. Cria o grupo e a carona e abre a confirmação.'''
     sol = get_object_or_404(Solicitacao, pk=solicitacao_id)
     rota = sol.rota
+    # pedido: confirma o dono da rota (motorista)
+    # oferta: confirma o destinatário (passageiro que recebeu a oferta)
+    passageiro = sol.destinatario if sol.tipo == 'oferta' else sol.solicitante
+    autorizado = (rota.id_usuario_id == request.usuario.pk
+                  if sol.tipo == 'pedido'
+                  else sol.destinatario_id == request.usuario.pk)
 
-    if request.method != 'POST' or rota.id_usuario_id != request.usuario.pk:
+    if request.method != 'POST' or not autorizado:
         return redirect('grupos_rota')
 
     try:
@@ -371,15 +798,15 @@ def confirmar_solicitacao(request, solicitacao_id):
     grupo, _ = Grupo.objects.get_or_create(
         rota=rota,
         defaults={'nome': f'{rota.origem} → {rota.id_instituicao.sigla}'})
-    grupo.usuarios.add(rota.id_usuario, sol.solicitante)
+    grupo.usuarios.add(rota.id_usuario, passageiro)
 
     carona = Carona.objects.filter(rota=rota, data=data).first()
     if carona is None:
         carona = Carona.objects.create(grupo=grupo, rota=rota, data=data, status='confirmada')
 
-    ja_esta = carona.passageiros.filter(pk=sol.solicitante.pk).exists()
+    ja_esta = carona.passageiros.filter(pk=passageiro.pk).exists()
     if ja_esta or carona.passageiros.count() < rota.vagas:
-        carona.passageiros.add(sol.solicitante)
+        carona.passageiros.add(passageiro)
         sol.status = 'aceita'
         sol.respondida_em = timezone.now()
         sol.save()

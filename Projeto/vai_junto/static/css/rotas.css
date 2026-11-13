@@ -1,15 +1,96 @@
-body{padding:clamp(18px,4vw,52px);background:linear-gradient(180deg,#edf3ff 0,#f8fafc 260px)}
-body>header,body>h1,body>form,body>.card,body>p{width:min(100%,1000px);margin-right:auto;margin-left:auto}
-body>header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:32px}
-body>header>a{font-weight:800;font-size:1.2rem;text-decoration:none}
-body>header nav form{display:inline}
-body>header nav button{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:700}
-h1{width:min(100%,1000px);margin:0 auto 20px;color:var(--navy);font-size:clamp(1.8rem,4vw,2.6rem)}
-body>form{display:flex;align-items:end;gap:10px;margin-bottom:24px;padding:18px;border:1px solid var(--line);border-radius:14px;background:white}
-body>form label{font-weight:700}
-body>form input{flex:1;min-width:120px;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
-body>form button{padding:10px 18px;border:0;border-radius:8px;background:var(--blue);color:white;font-weight:700}
-body>.card{margin-bottom:14px}
-.card h2{margin-top:0;font-size:1.25rem}
-.card h2 a{text-decoration:none}
-@media(max-width:580px){body>form{align-items:stretch;flex-direction:column}}
+/* Rotas VaiJunto — visual alinhado ao Protótipo 1 */
+.pagina-rotas{min-height:100vh;padding:0 0 92px;background:#f6f8fc;color:#172554}
+.pagina-rotas .topbar{height:64px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #e2e8f0}
+.pagina-rotas .marca{display:inline-flex;align-items:center;gap:9px;color:#14215a;text-decoration:none;font-size:19px;font-weight:800;letter-spacing:-.4px}
+.marca-logo{height:44px;width:auto;display:block}
+.topbar-acoes{display:flex;align-items:center;gap:16px}
+.online{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:20px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:700}
+.online span{width:7px;height:7px;border-radius:50%;background:#22c55e}
+.avatar-topo{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#dbeafe;color:#2563eb;text-decoration:none;font-weight:800;overflow:hidden}
+.avatar-topo img{width:100%;height:100%;object-fit:cover;display:block}
+.rotas-container{width:min(100% - 40px,1000px);margin:34px auto 30px}
+.cabecalho-pagina{margin-bottom:25px}
+.sobretitulo{color:#2563eb;font-size:11px;font-weight:800;letter-spacing:1.2px}
+.cabecalho-pagina h1{margin:5px 0 4px;color:#172554;font-size:clamp(25px,4vw,32px);letter-spacing:-.8px}
+.cabecalho-pagina p{margin:0;color:#64748b;font-size:14px}
+.busca-rotas{margin:0 0 27px;padding:17px 19px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;box-shadow:0 3px 12px rgba(20,33,90,.035)}
+.busca-rotas label{display:block;margin-bottom:8px;color:#334155;font-size:13px;font-weight:700}
+.campo-busca{display:flex;align-items:center;gap:10px}
+.campo-busca>span{color:#64748b;font-size:25px;line-height:1}
+.campo-busca input{flex:1;min-width:0;height:42px;padding:0 12px;border:1px solid #dbe3ef;border-radius:9px;background:#fbfcff;font-size:14px}
+.campo-busca button{height:42px;padding:0 21px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:700;font-size:13px}
+.lista-cabecalho{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.lista-cabecalho h2{margin:0;color:#172554;font-size:17px}
+.lista-cabecalho>span{color:#64748b;font-size:12px}
+.lista-rotas{display:grid;gap:12px}
+.rota-card{display:flex;flex-wrap:wrap;align-items:center;gap:15px;min-height:94px;padding:15px 18px;border:1px solid #e2e8f0;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(20,33,90,.035);transition:border-color .18s,transform .18s}
+.rota-card:hover{border-color:#b9cdfa;transform:translateY(-1px)}
+.rota-avatar-link{display:block;flex:0 0 46px;text-decoration:none}
+.rota-avatar{width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#dbeafe;color:#2563eb;font-size:16px;font-weight:800;overflow:hidden}
+.rota-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.rota-conteudo{flex:1;min-width:0}
+.rota-titulo-linha{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.rota-titulo-linha h3{margin:0;color:#172554;font-size:14px}
+.rota-titulo-linha h3 a{color:inherit;text-decoration:none}
+.rota-titulo-linha h3 a:hover{color:#2563eb}
+.selo-verificado{padding:3px 8px;border-radius:20px;background:#f1f5f9;color:#64748b;font-size:10px;font-weight:600}
+.rota-destino{margin:4px 0 6px;font-size:13px;font-weight:700}
+.rota-destino a{color:#1e3a8a;text-decoration:none}
+.rota-destino a:hover{color:#2563eb}
+.rota-destino span{padding:0 4px;color:#2563eb}
+.rota-metadados{display:flex;gap:13px;flex-wrap:wrap;color:#64748b;font-size:11px}
+.rota-lateral{display:flex;flex-direction:column;align-items:flex-end;gap:9px}
+.vagas{padding:6px 10px;border-radius:8px;background:#dcfce7;color:#15803d;font-size:11px;font-weight:800;white-space:nowrap}
+.ver-rota{color:#2563eb;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+.ver-rota span{font-size:16px}
+.estado-vazio{padding:55px 20px;border:1px dashed #cbd5e1;border-radius:15px;background:#fff;text-align:center}
+.vazio-icone{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 12px;border-radius:50%;background:#eff6ff;color:#2563eb;font-size:30px}
+.estado-vazio h3{margin:0 0 5px;color:#172554;font-size:17px}
+.estado-vazio p{margin:0 0 15px;color:#64748b;font-size:13px}
+.estado-vazio>a{color:#2563eb;font-size:13px;font-weight:700;text-decoration:none}
+.nav-inferior{position:fixed;z-index:5;right:0;bottom:0;left:0;display:flex;justify-content:center;gap:clamp(30px,12vw,150px);height:68px;padding:7px 20px;background:#fff;border-top:1px solid #e2e8f0}
+.nav-inferior a{display:flex;min-width:62px;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:#64748b;font-size:10px;text-decoration:none}
+.nav-inferior a span{font-size:21px;line-height:1.2}
+.nav-inferior a.ativo{color:#2563eb;font-weight:800}
+@media(max-width:600px){.pagina-rotas .topbar{padding:0 18px}.rotas-container{width:calc(100% - 28px);margin-top:25px}.campo-busca{flex-wrap:wrap}.campo-busca input{flex:1 1 calc(100% - 40px)}.campo-busca button{width:100%}.rota-card{align-items:flex-start;gap:10px;padding:13px}.rota-avatar-link{flex-basis:40px}.rota-avatar{width:40px;height:40px}.rota-lateral{gap:7px}.rota-metadados{flex-direction:column;gap:3px}.nav-inferior{gap:clamp(24px,13vw,70px)}}
+
+/* Solicitar carona / estado da solicitação no card */
+.rota-acao{flex:0 0 100%;margin-top:10px}
+.form-solicitar{margin:0}
+.btn-solicitar{display:block;width:100%;padding:12px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.btn-solicitar:hover{background:#1d4ed8}
+.solicitacao-enviada{padding:12px;border-radius:10px;background:#dcfce7;color:#15803d;font-size:13.5px;font-weight:700;text-align:center}
+.btn-chat-grupo{display:block;padding:12px;border-radius:10px;background:#eff6ff;color:#2563eb;font-size:13.5px;font-weight:700;text-align:center;text-decoration:none}
+.btn-chat-grupo:hover{background:#dbeafe}
+
+/* Abas: Rotas / Usuários / Meus grupos / Solicitações */
+.rt-abas{display:inline-flex;background:#e2e8f0;border-radius:10px;padding:4px;margin-bottom:16px;flex-wrap:wrap}
+.rt-aba{border:0;background:transparent;padding:8px 18px;border-radius:8px;font-weight:600;color:#64748b;cursor:pointer;font-size:13px}
+.rt-aba.ativa{background:#fff;color:#0f1f4d}
+.rt-badge{background:#facc15;color:#0f1f4d;border-radius:999px;padding:1px 7px;font-size:12px;margin-left:6px}
+.rt-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.rt-ini{width:40px;height:40px;border-radius:50%;background:#dbeafe;color:#2563eb;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;overflow:hidden}
+.rt-ini img{width:100%;height:100%;object-fit:cover;display:block}
+.rt-info{flex:1;min-width:0}
+.rt-info strong{display:block;color:#0f1f4d;font-size:14px}
+.rt-info span{font-size:12px;color:#64748b}
+.rt-link{color:#2563eb;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+.rt-vazio{color:#64748b;font-size:13px;text-align:center;padding:30px 10px;background:#fff;border:1px dashed #cbd5e1;border-radius:12px}
+.rt-status{font-size:11px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap}
+.rt-pendente{background:#fef9c3;color:#854d0e}
+.rt-aceita{background:#dcfce7;color:#15803d}
+.rt-recusada{background:#fee2e2;color:#b91c1c}
+
+/* Aba Solicitações: duas seções + aceitar/recusar */
+.rt-subtitulo{margin:18px 0 10px;color:#172554;font-size:15px;font-weight:800}
+.rt-subtitulo:first-child{margin-top:2px}
+.rt-acoes{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.rt-acoes input[type="date"]{padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:12.5px;color:#172554}
+.pagina-rotas .rt-btn{border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;font-size:12.5px;padding:8px 14px;cursor:pointer}
+.pagina-rotas .rt-btn:hover{background:#1d4ed8}
+.pagina-rotas .rt-btn-verm{background:#fee2e2;color:#b91c1c}
+.pagina-rotas .rt-btn-verm:hover{background:#fecaca}
+.rt-nome{text-decoration:none;color:inherit;display:block}
+.rt-nome:hover strong{color:#2563eb}
+.rt-tag{flex-shrink:0;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;background:#dcfce7;color:#15803d;white-space:nowrap}
+.rt-tag-azul{background:#dbeafe;color:#1d4ed8}
