@@ -1,5 +1,4 @@
 {% load static %}
-{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -16,7 +15,41 @@
     <h1>Avalie sua carona</h1>
     <p>Sua avaliação ajuda a manter a comunidade segura e confiável.</p>
 
-    <p>As avaliações ficam disponíveis após a conclusão de uma carona.</p>
+    <p class="resumo">{{ rota.origem }} → {{ rota.id_instituicao.sigla }} · {{ carona.data|date:"d/m/Y" }}</p>
+
+    {% if erro %}<p class="erro">{{ erro }}</p>{% endif %}
+
+    {% if carona.status != 'concluida' %}
+      <p>As avaliações ficam disponíveis após a conclusão de uma carona.</p>
+    {% else %}
+      {% for p in participantes %}
+        <div class="pessoa">
+          <div class="foto">{{ p.nome|first|upper }}</div>
+          <div class="nome">{{ p.nome }}</div>
+          <p class="papel">
+            {% if p.pk == rota.id_usuario.pk %}Motorista{% else %}Passageiro{% endif %}
+          </p>
+
+          {% if p.ja_avaliado %}
+            <p class="feito">
+              {% if p.minha_nota %}👍 Você aprovou{% else %}👎 Você não aprovou{% endif %}
+            </p>
+          {% else %}
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="avaliado_id" value="{{ p.id_usuario }}">
+              <div class="opcoes">
+                <button type="submit" name="aprovou" value="1" class="aprovo">👍 Aprovo</button>
+                <button type="submit" name="aprovou" value="0" class="nao-aprovo">👎 Não aprovo</button>
+              </div>
+            </form>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p>Não há ninguém para avaliar nesta carona.</p>
+      {% endfor %}
+    {% endif %}
+
     <a href="{% url 'rotas' %}">Ver rotas disponíveis</a>
   </div>
 

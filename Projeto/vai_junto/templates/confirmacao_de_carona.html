@@ -115,7 +115,18 @@
                 <a class="conf-botao principal" href="{% url 'grupo_detalhes' grupo.id_grupo %}">Ir para o grupo</a>
             {% endif %}
             <a class="conf-botao secundario" href="{% url 'grupos_rota' %}">Voltar aos grupos</a>
+            {% if eh_motorista and carona.status != 'concluida' %}
+                <form method="post" action="{% url 'concluir_carona' carona.id_carona %}" style="flex:1;min-width:180px">
+                    {% csrf_token %}
+                    <button type="submit" class="conf-botao secundario" style="width:100%">Concluir carona</button>
+                </form>
+            {% endif %}
         </div>
+                {% if carona.status != 'concluida' %}
+            <p style="text-align:center;font-size:12px;color:#64748b;margin-top:14px">
+                A avaliação fica disponível depois que a carona for concluída.
+            </p>
+        {% endif %}
 
     </main>
 </body>

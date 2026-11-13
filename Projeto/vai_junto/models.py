@@ -162,9 +162,10 @@ class Avaliacao(models.Model):
     criada_em = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        managed = True
-        db_table = 'avaliacao'
-        verbose_name_plural = "Avaliações"
+    managed = True
+    db_table = 'avaliacao'
+    verbose_name_plural = "Avaliações"
+    unique_together = ('carona', 'avaliador', 'avaliado')   
 
     def __str__(self):
         return f"{self.avaliador} avaliou {self.avaliado}"

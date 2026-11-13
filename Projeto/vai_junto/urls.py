@@ -31,4 +31,6 @@ urlpatterns = [
     path('caronas/<int:carona_id>/', views.carona_detalhes, name='carona_detalhes'),
     path('solicitacoes/<int:solicitacao_id>/confirmar/', views.confirmar_solicitacao, name='confirmar_solicitacao'),
     path('caronas/<int:carona_id>/confirmada/', views.confirmacao_carona, name='confirmacao_carona'),
+    path('caronas/<int:carona_id>/avaliar/', views.avaliar_carona, name='avaliar_carona'),
+    path('caronas/<int:carona_id>/concluir/', views.concluir_carona, name='concluir_carona'),
 ]

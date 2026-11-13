@@ -96,3 +96,66 @@ button {
 button:hover {
   background-color: #1d4ed8;
 }
+
+
+.resumo {
+  font-weight: bold;
+  color: #172554;
+}
+
+.erro {
+  color: #B91C1C;
+  background-color: #FEE2E2;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.pessoa {
+  border-top: 1px solid #E2E8F0;
+  padding: 16px 0 8px;
+}
+
+.pessoa .foto {
+  margin-top: 0;
+}
+
+.papel {
+  margin: 2px 0 10px;
+  font-size: 13px;
+}
+
+.opcoes {
+  display: flex;
+  gap: 8px;
+}
+
+.opcoes button {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.opcoes .nao-aprovo {
+  background-color: #ffffff;
+  color: #B91C1C;
+  border: 1px solid #FCA5A5;
+}
+
+.opcoes .nao-aprovo:hover {
+  background-color: #FEE2E2;
+}
+
+.feito {
+  font-weight: bold;
+  color: #15803D;
+  margin: 4px 0;
+}
+
+.caixa > a {
+  display: inline-block;
+  margin-top: 16px;
+  color: #2563EB;
+  font-size: 14px;
+}

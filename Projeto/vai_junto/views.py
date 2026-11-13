@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from vai_junto.models import (Usuario, Rota, Grupo, Carona, Instituicao,
                               HorarioRota, Solicitacao)
+from django.db.models import Count, Q
 
 
 # ---------------------------------------------------------------
@@ -285,6 +286,9 @@ def usuario_remover(request, usuario_id):
 
 def perfil(request, usuario_id):
     usuario = get_object_or_404(Usuario, id_usuario=usuario_id)
+    dados = alvo.avaliacoes_recebidas.aggregate(
+    total=Count('id_avaliacao'),
+    aprovadas=Count('id_avaliacao', filter=Q(aprovou=True)))
     return render(request, 'PerfilDoUsuario.html', {
         'usuario': usuario,
         'rotas': usuario.rotas.all(),
@@ -413,3 +417,12 @@ def confirmacao_carona(request, carona_id):
         'vagas_restantes': max(rota.vagas - passageiros.count(), 0),
         'usuario_logado': request.usuario,
     })
+
+@login_necessario
+def concluir_carona(request, carona_id):
+    '''O motorista marca a carona como concluída, liberando as avaliações.'''
+    carona = get_object_or_404(Carona, id_carona=carona_id)
+    if request.method == 'POST' and carona.rota.id_usuario_id == request.usuario.pk:
+        carona.status = 'concluida'
+        carona.save()
+    return redirect('confirmacao_carona', carona_id=carona.id_carona)
