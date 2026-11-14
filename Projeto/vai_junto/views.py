@@ -1,6 +1,7 @@
 import os
 from functools import wraps
 from datetime import date, datetime
+from decimal import Decimal, InvalidOperation
 from django.utils import timezone
 
 from django.core import signing
@@ -12,7 +13,7 @@ from django.urls import reverse
 from django.contrib.auth.hashers import make_password, check_password
 from vai_junto.models import (Usuario, Rota, Grupo, Carona, Instituicao,
                               HorarioRota, Solicitacao, Mensagem, Veiculo, Avaliacao,
-                              Percurso, ParadaPercurso)
+                              Percurso, ParadaPercurso, Seguidor, PesquisaRecente)
 
 
 # ---------------------------------------------------------------
@@ -38,6 +39,52 @@ def login_necessario(view):
 
 def ultima_rota(usuario):
     return usuario.rotas.order_by('-id_rota').first()
+
+
+def fmt_valor(v):
+    '''R$ no formato brasileiro: 5.00 vira "5,00".'''
+    return f'{v:.2f}'.replace('.', ',')
+
+
+def anota_lotacao(rota):
+    '''Lotação do grupo da rota: as vagas do veículo são só pros passageiros
+    (o motorista não ocupa vaga). Completa a rota com n_passageiros,
+    vagas_livres e grupo_cheio.'''
+    grupo = Grupo.objects.filter(rota=rota).first()
+    if grupo and grupo.encerrado:
+        grupo = None  # encerrado ou vazio (legado): a rota volta a ter todas as vagas
+    rota.n_passageiros = (grupo.usuarios.exclude(pk=rota.id_usuario_id).count()
+                          if grupo else 0)
+    rota.vagas_livres = max(0, rota.vagas - rota.n_passageiros)
+    # vagas=0 é dado legado/inconsistente: não trava a rota, só não mostra contador
+    rota.grupo_cheio = rota.vagas > 0 and rota.vagas_livres == 0
+
+
+def anota_valor(grupo):
+    '''A cobrança do motorista é o TOTAL da carona, dividido igualmente
+    entre os passageiros (membros menos o motorista). Completa o grupo
+    com as versões formatadas: valor_total_fmt, valor_pessoa_fmt,
+    n_passageiros.'''
+    if grupo.valor is None:
+        return
+    grupo.valor_total_fmt = fmt_valor(grupo.valor)
+    grupo.n_passageiros = max(0, grupo.usuarios.count() - 1)
+    if grupo.n_passageiros:
+        por_pessoa = (grupo.valor / grupo.n_passageiros).quantize(
+            Decimal('0.01'))
+        grupo.valor_pessoa_fmt = fmt_valor(por_pessoa)
+
+
+def anota_percurso(p):
+    '''Completa um percurso concluído com os dados de exibição
+    (total de paradas, paradas feitas e duração formatada).'''
+    p.total_paradas = len(p.paradas.all())
+    p.feitas = sum(1 for par in p.paradas.all() if par.status == 'concluida')
+    if p.finalizado_em and p.iniciado_em:
+        minutos = max(1, int((p.finalizado_em - p.iniciado_em).total_seconds() // 60))
+        p.duracao = f'{minutos} min' if minutos < 60 else f'{minutos // 60}h{minutos % 60:02d}'
+    else:
+        p.duracao = ''
 
 
 def buscar_matches(rota, janela=60):
@@ -116,9 +163,9 @@ def login_view(request):
 
 
 def logout_view(request):
-    if request.method == 'POST':
-        request.session.flush()
-    return redirect('home')
+    '''Sai da conta e volta pra tela de login ("Trocar de conta").'''
+    request.session.flush()
+    return redirect('login')
 
 
 # -------------------------------------------------------------
@@ -428,11 +475,13 @@ def _contexto_descobrir(usuario, q=''):
     # Em cada card: eu sou o dono? já pedi carona? já estou no grupo?
     minhas_solicitacoes = {s.rota_id: s.status
                            for s in Solicitacao.objects.filter(solicitante=usuario)}
-    meus_grupos = {g.rota_id: g.id_grupo for g in usuario.grupos.all()}
+    meus_grupos = {g.rota_id: g.id_grupo
+                   for g in usuario.grupos.all() if not g.encerrado}
     for r in lista:
         r.eh_dono = r.id_usuario_id == usuario.id_usuario
         r.minha_solicitacao = minhas_solicitacoes.get(r.id_rota)
         r.meu_grupo_id = meus_grupos.get(r.id_rota)
+        anota_lotacao(r)
 
     # Sugestões pelo trajeto da pessoa (mesma instituição, horário próximo,
     # mesma origem primeiro):
@@ -448,6 +497,7 @@ def _contexto_descobrir(usuario, q=''):
             m.eh_dono = False
             m.minha_solicitacao = minhas_solicitacoes.get(m.id_rota)
             m.meu_grupo_id = meus_grupos.get(m.id_rota)
+            anota_lotacao(m)
         ids = {m.id_rota for m in sugestoes}
         lista = [r for r in lista if r.id_rota not in ids]
     elif minha_rota and usuario.papel in ('dar', 'ambos'):
@@ -460,9 +510,23 @@ def _contexto_descobrir(usuario, q=''):
     # Abas: usuários (menos eu), meus grupos e minhas solicitações
     outros_usuarios = (Usuario.objects.exclude(pk=usuario.pk)
                        .order_by('nome'))
-    meus_grupos_lista = (usuario.grupos
-                         .select_related('rota', 'rota__id_instituicao')
-                         .order_by('nome'))
+    if q:
+        # a busca também filtra a aba Usuários (por nome)
+        outros_usuarios = outros_usuarios.filter(nome__icontains=q)
+        # guarda a pesquisa no histórico da pessoa (máx. 10 termos)
+        PesquisaRecente.objects.update_or_create(usuario=usuario, termo=q)
+        antigas = (PesquisaRecente.objects.filter(usuario=usuario)
+                   .order_by('-criada_em').values_list('id', flat=True)[10:])
+        PesquisaRecente.objects.filter(id__in=list(antigas)).delete()
+    pesquisas_recentes = list(usuario.pesquisas.values_list('termo', flat=True)[:10])
+    meus_grupos_lista = []
+    for g in (usuario.grupos
+              .select_related('rota', 'rota__id_instituicao')
+              .order_by('nome')):
+        # motorista não ocupa vaga: o denominador é o nº de vagas do veículo
+        g.n_passageiros = g.usuarios.exclude(pk=g.rota.id_usuario_id).count()
+        if not g.encerrado:
+            meus_grupos_lista.append(g)
     minhas_sols = list(Solicitacao.objects
                        .filter(solicitante=usuario)
                        .select_related('rota', 'rota__id_usuario',
@@ -488,6 +552,7 @@ def _contexto_descobrir(usuario, q=''):
         'sugestoes': sugestoes,
         'sugestoes_pass': sugestoes_pass,
         'minha_rota': minha_rota,
+        'pesquisas_recentes': pesquisas_recentes,
         'outros_usuarios': outros_usuarios,
         'meus_grupos_lista': meus_grupos_lista,
         'minhas_sols': minhas_sols,
@@ -560,6 +625,26 @@ def perfil(request, usuario_id):
     if uid and uid != usuario.id_usuario:
         minhas_avaliacoes = {a.papel: a.aprovou for a in
                              Avaliacao.objects.filter(avaliador_id=uid, avaliado=usuario)}
+    # histórico: percursos concluídos da pessoa, como motorista ou passageiro
+    historico = list(Percurso.objects
+                     .filter(grupo__usuarios=usuario, status='concluido')
+                     .select_related('grupo', 'grupo__rota',
+                                     'grupo__rota__id_instituicao',
+                                     'grupo__rota__id_usuario')
+                     .prefetch_related('paradas'))
+    for p in historico:
+        anota_percurso(p)
+        p.papel_na_viagem = ('motorista'
+                             if p.grupo.rota.id_usuario_id == usuario.id_usuario
+                             else 'passageiro')
+        if p.grupo.valor is not None:
+            anota_valor(p.grupo)
+            p.valor_fmt = getattr(p.grupo, 'valor_pessoa_fmt', None)
+    # seguidores / seguindo
+    seguidores = [s.seguidor for s in
+                  usuario.seguidores.select_related('seguidor')]
+    seguindo = [s.seguido for s in
+                usuario.seguindo.select_related('seguido')]
     return render(request, 'PerfilDoUsuario.html', {
         'usuario': usuario,
         'rotas': rotas,
@@ -572,12 +657,33 @@ def perfil(request, usuario_id):
         'pct_motorista': pct(av_motorista), 'n_motorista': len(av_motorista),
         'pct_passageiro': pct(av_passageiro), 'n_passageiro': len(av_passageiro),
         'minhas_avaliacoes': minhas_avaliacoes,
+        'historico': historico,
+        'seguidores': seguidores,
+        'seguindo': seguindo,
+        # o visitante logado já segue essa pessoa?
+        'ja_sigo': bool(uid and uid != usuario.id_usuario
+                        and Seguidor.objects.filter(seguidor_id=uid,
+                                                    seguido=usuario).exists()),
         # vagas > 0: veículos do motorista · vagas = 0: preferências do passageiro
         'veiculos_motorista': [v for v in veiculos if v.vagas > 0],
         'preferencias': [v for v in veiculos if v.vagas == 0],
         # selo de matrícula verificada só aparece se o número passa na validação
         'matricula_valida': usuario.matricula.isdigit() and 6 <= len(usuario.matricula) <= 10,
     })
+
+
+@login_necessario
+def seguir(request, usuario_id):
+    '''Segue/deixa de seguir um usuário (alterna a cada POST).
+    Ninguém segue a si mesmo.'''
+    alvo = get_object_or_404(Usuario, id_usuario=usuario_id)
+    if request.method == 'POST' and alvo != request.usuario:
+        rel = Seguidor.objects.filter(seguidor=request.usuario, seguido=alvo)
+        if rel.exists():
+            rel.delete()
+        else:
+            Seguidor.objects.get_or_create(seguidor=request.usuario, seguido=alvo)
+    return redirect('perfil', usuario_id=usuario_id)
 
 
 @login_necessario
@@ -685,6 +791,8 @@ def editar_perfil(request):
 @login_necessario
 def grupo_detalhes(request, grupo_id):
     grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
+    if grupo.encerrado:
+        return redirect('grupos_rota')
     contexto = _contexto_descobrir(request.usuario)
     contexto.update({
         'detalhe': True,
@@ -825,13 +933,14 @@ def grupo_chat(request, grupo_id):
     '''Chat do grupo: só quem é membro vê e manda mensagens.
     Também mostra o percurso em andamento e os percursos passados.'''
     grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
-    if not grupo.usuarios.filter(pk=request.usuario.pk).exists():
+    if grupo.encerrado or not grupo.usuarios.filter(pk=request.usuario.pk).exists():
         return redirect('grupos_rota')
     if request.method == 'POST':
         texto = request.POST.get('texto', '').strip()
         if texto:
             Mensagem.objects.create(grupo=grupo, usuario=request.usuario, texto=texto)
         return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+    anota_valor(grupo)
     percurso_ativo = (grupo.percursos.filter(status='em_andamento')
                       .prefetch_related('paradas').first())
     # pontos pro mapa do percurso (Leaflet): saída, cada passageiro com
@@ -852,13 +961,7 @@ def grupo_chat(request, grupo_id):
     passados = list(grupo.percursos.filter(status='concluido')
                     .prefetch_related('paradas'))
     for p in passados:
-        p.total_paradas = len(p.paradas.all())
-        p.feitas = sum(1 for par in p.paradas.all() if par.status == 'concluida')
-        if p.finalizado_em and p.iniciado_em:
-            minutos = max(1, int((p.finalizado_em - p.iniciado_em).total_seconds() // 60))
-            p.duracao = f'{minutos} min' if minutos < 60 else f'{minutos // 60}h{minutos % 60:02d}'
-        else:
-            p.duracao = ''
+        anota_percurso(p)
     return render(request, 'chat.html', {
         'grupo': grupo,
         'mensagens': grupo.mensagens.select_related('usuario'),
@@ -877,8 +980,9 @@ def grupo_info(request, grupo_id):
     Todo membro vê a lista de pessoas; só o motorista edita nome/foto e
     remove membros (os botões só aparecem pra ele).'''
     grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
-    if not grupo.usuarios.filter(pk=request.usuario.pk).exists():
+    if grupo.encerrado or not grupo.usuarios.filter(pk=request.usuario.pk).exists():
         return redirect('grupos_rota')
+    anota_valor(grupo)
     membros = list(grupo.usuarios.all())
     for m in membros:
         # ponto de origem do trajeto da pessoa (onde o motorista busca)
@@ -895,8 +999,9 @@ def grupo_info(request, grupo_id):
 
 @login_necessario
 def grupo_editar(request, grupo_id):
-    '''Só o motorista (dono da rota) edita o nome e a foto do grupo.
-    Ninguém é adicionado por aqui: entrada no grupo é só pela carona aceita.'''
+    '''Só o motorista (dono da rota) edita o nome, a foto e o valor da
+    cobrança do grupo. Ninguém é adicionado por aqui: entrada no grupo
+    é só pela carona aceita.'''
     grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
     if grupo.rota.id_usuario_id != request.usuario.pk:
         return redirect('grupo_chat', grupo_id=grupo.id_grupo)
@@ -906,6 +1011,18 @@ def grupo_editar(request, grupo_id):
             grupo.nome = nome
         if request.FILES.get('foto'):
             grupo.foto = request.FILES['foto']
+        # cobrança combinada (opcional): vazio = sem cobrança.
+        # Aceita "5,00" ou "5.00"; valor inválido é ignorado.
+        valor_txt = request.POST.get('valor', '').strip().replace(',', '.')
+        if not valor_txt:
+            grupo.valor = None
+        else:
+            try:
+                valor = Decimal(valor_txt)
+                if valor >= 0:
+                    grupo.valor = valor
+            except InvalidOperation:
+                pass
         grupo.save()
     return redirect('grupo_chat', grupo_id=grupo.id_grupo)
 
@@ -923,6 +1040,11 @@ def grupo_remover_membro(request, grupo_id, usuario_id):
         grupo.usuarios.remove(alvo)
         for carona in grupo.caronas.all():
             carona.passageiros.remove(alvo)
+        # sem nenhum passageiro o grupo é encerrado (o histórico fica salvo)
+        if not grupo.usuarios.exclude(pk=grupo.rota.id_usuario_id).exists():
+            grupo.encerrado_em = timezone.now()
+            grupo.save(update_fields=['encerrado_em'])
+            return redirect('grupos_rota')
     return redirect('grupo_chat', grupo_id=grupo.id_grupo)
 
 
@@ -953,7 +1075,7 @@ def percurso_iniciar(request, grupo_id):
                 if rota_p.referencia:
                     descricao += f' ({rota_p.referencia})'
             ParadaPercurso.objects.create(percurso=percurso, ordem=ordem,
-                                          descricao=descricao)
+                                          descricao=descricao, passageiro=p)
             ordem += 1
         ParadaPercurso.objects.create(
             percurso=percurso, ordem=ordem,
@@ -1014,6 +1136,19 @@ def confirmar_solicitacao(request, solicitacao_id):
     grupo, _ = Grupo.objects.get_or_create(
         rota=rota,
         defaults={'nome': f'{rota.origem} → {rota.id_instituicao.sigla}'})
+    if grupo.encerrado:
+        # tinha ficado sem passageiros: reabre com a nova entrada
+        grupo.encerrado_em = None
+        grupo.save(update_fields=['encerrado_em'])
+    # as vagas do veículo são o limite de passageiros do grupo: grupo cheio
+    # = solicitação recusada e ninguém mais entra (o motorista não ocupa vaga)
+    ja_no_grupo = grupo.usuarios.filter(pk=passageiro.pk).exists()
+    n_passageiros = grupo.usuarios.exclude(pk=rota.id_usuario_id).count()
+    if not ja_no_grupo and n_passageiros >= rota.vagas:
+        sol.status = 'recusada'   # grupo cheio
+        sol.respondida_em = timezone.now()
+        sol.save()
+        return redirect('grupos_rota')
     grupo.usuarios.add(rota.id_usuario, passageiro)
 
     carona = Carona.objects.filter(rota=rota, data=data).first()
@@ -1055,20 +1190,4 @@ def confirmacao_carona(request, carona_id):
         'eh_motorista': eh_motorista,
         'vagas_restantes': max(rota.vagas - passageiros.count(), 0),
         'usuario_logado': request.usuario,
-    })
-
-def solicitacoes(request):
-    '''Lista os pedidos de carona pendentes que o motorista recebeu (RF10).'''
-    usuario = usuario_logado(request)
-    if not usuario:
-        return redirect('login')
-
-    pendentes = (Solicitacao.objects
-                 .filter(rota__id_usuario=usuario, tipo='pedido', status='pendente')
-                 .select_related('solicitante', 'rota', 'rota__id_instituicao')
-                 .order_by('-criada_em'))
-
-    return render(request, 'solicitacoes.html', {
-        'solicitacoes': pendentes,
-        'usuario_logado': usuario,
     })

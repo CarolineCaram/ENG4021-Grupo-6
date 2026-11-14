@@ -28,9 +28,18 @@
       {% else %}
         <div class="hero-foto letra">{{ grupo.nome|first|upper }}</div>
       {% endif %}
-      <h1>{{ grupo.nome }}</h1>
-      <p>{{ grupo.rota.origem }} → {{ grupo.rota.id_instituicao.sigla }} · {{ grupo.usuarios.count }} membro{{ grupo.usuarios.count|pluralize }}</p>
+      <div class="hero-info">
+        <h1>{{ grupo.nome }}</h1>
+        <p>{{ grupo.rota.origem }} → {{ grupo.rota.id_instituicao.sigla }} · {{ grupo.usuarios.count }} membro{{ grupo.usuarios.count|pluralize }}</p>
+        {% if grupo.valor %}
+          <p class="valor-combinado">Cobrança combinada: <strong>R$ {{ grupo.valor_total_fmt }}</strong> no total{% if grupo.valor_pessoa_fmt %} · <strong>R$ {{ grupo.valor_pessoa_fmt }}</strong> por pessoa{% endif %}</p>
+        {% else %}
+          <p class="valor-combinado sem-valor">Carona sem cobrança</p>
+        {% endif %}
+      </div>
     </div>
+
+    <div class="info-grid">
 
     {% if e_admin %}
       <form class="editar-grupo" method="post" action="{% url 'grupo_editar' grupo.id_grupo %}" enctype="multipart/form-data">
@@ -75,6 +84,8 @@
           </li>
         {% endfor %}
       </ul>
+    </div>
+
     </div>
 
   </div>

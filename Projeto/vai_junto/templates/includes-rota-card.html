@@ -17,17 +17,19 @@
     </div>
   </div>
   <div class="rota-lateral">
-    <span class="vagas">{{ rota.vagas }} {% if rota.vagas == 1 %}vaga{% else %}vagas{% endif %}</span>
+    <span class="vagas">{% if rota.vagas > 0 %}{{ rota.vagas_livres|default:rota.vagas }}/{{ rota.vagas }} {% else %}{{ rota.vagas }} {% endif %}{% if rota.vagas == 1 %}vaga{% else %}vagas{% endif %}</span>
     <a class="ver-rota" href="{% url 'rota_detalhes' rota.id_rota %}">Ver rota <span>→</span></a>
   </div>
   {% if usuario_logado and not rota.eh_dono and usuario_logado.papel != 'dar' %}
     <div class="rota-acao">
       {% if rota.meu_grupo_id %}
-        <a class="btn-chat-grupo" href="{% url 'grupo_chat' rota.meu_grupo_id %}">💬 Abrir chat do grupo</a>
+        <a class="btn-chat-grupo" href="{% url 'grupo_chat' rota.meu_grupo_id %}"><svg class="icone-chat" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Abrir chat do grupo</a>
       {% elif rota.minha_solicitacao == 'pendente' %}
         <div class="solicitacao-enviada">✓ Solicitação enviada!</div>
       {% elif rota.minha_solicitacao == 'aceita' %}
         <div class="solicitacao-enviada">✓ Solicitação aceita!</div>
+      {% elif rota.grupo_cheio %}
+        <div class="solicitacao-enviada rt-cheio">Grupo cheio · {{ rota.n_passageiros }}/{{ rota.vagas }} passageiros</div>
       {% else %}
         <form class="form-solicitar" method="post" action="{% url 'contatar' rota.id_rota %}">
           {% csrf_token %}

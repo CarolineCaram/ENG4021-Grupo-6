@@ -399,3 +399,25 @@ body.perfil-page {
 .perfil-page .aval-nome:hover strong { color: #2563eb; }
 .perfil-chip-cinza { background: #94a3b8; }
 .perfil-chip-mini-cinza { background: #f1f5f9; color: #64748b; }
+
+/* seguir / seguidores / histórico (nov.) */
+.perfil-stat .roxo { color: #7c3aed; }
+.seguir-form { margin-top: 10px; }
+.btn-seguir { padding: 8px 22px; border: 0; border-radius: 999px; background: #2563eb; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; }
+.btn-seguir.seguindo { background: #e2e8f0; color: #334155; }
+.seg-detalhes { margin: 6px 0; }
+.seg-detalhes summary { cursor: pointer; font-size: 14px; font-weight: 700; color: #334155; padding: 6px 0; }
+.seg-lista { display: flex; flex-direction: column; gap: 8px; padding: 10px 0 4px; }
+.seg-pessoa { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1e293b; font-size: 14px; }
+.seg-pessoa:hover { text-decoration: underline; }
+.hist-lista { display: flex; flex-direction: column; gap: 12px; }
+.hist-item { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; }
+.hist-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; color: #1e293b; }
+.hist-meta { display: block; margin-top: 4px; font-size: 12px; color: #64748b; }
+.hist-papel { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; }
+.hist-papel.motorista { background: #dbeafe; color: #1d4ed8; }
+.hist-papel.passageiro { background: #dcfce7; color: #15803d; }
+
+/* Trocar de conta (logout -> login) */
+.perfil-trocar { color: #2563eb !important; }
+.icone-trocar { vertical-align: -2px; margin-right: 3px; }

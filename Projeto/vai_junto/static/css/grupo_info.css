@@ -40,13 +40,38 @@ body.grupo-info-page {
   font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
-.grupo-info-page .info-topo .logo img { height: 30px; width: auto; display: block; }
+.grupo-info-page .info-topo .logo {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 4px 9px;
+  box-shadow: 0 1px 4px rgba(9, 20, 60, .25);
+}
+
+.grupo-info-page .info-topo .logo img { height: 22px; width: auto; display: block; }
+
+@media (max-width: 560px) {
+  .grupo-info-page .hero { flex-direction: column; text-align: center; }
+}
 
 .grupo-info-page .info-caixa {
-  width: min(100% - 24px, 520px);
+  width: min(100% - 32px, 1080px);
   margin: 18px auto 32px;
   display: grid;
   gap: 14px;
+}
+
+/* duas colunas em telas largas: edição à esquerda, membros à direita */
+.grupo-info-page .info-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@media (min-width: 760px) {
+  .grupo-info-page .info-grid { grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.4fr); }
 }
 
 /* hero do grupo */
@@ -55,14 +80,20 @@ body.grupo-info-page {
   border: 1px solid #e2e8f0;
   border-radius: 18px;
   box-shadow: 0 18px 50px rgba(20, 33, 90, .08);
-  padding: 28px 20px 22px;
-  text-align: center;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  text-align: left;
 }
+
+.grupo-info-page .hero-info { min-width: 0; }
 
 .grupo-info-page .hero-foto {
   width: 96px;
   height: 96px;
-  margin: 0 auto 14px;
+  flex: none;
+  margin: 0;
   border-radius: 50%;
   background: #2563eb;
   color: #ffffff;
@@ -249,3 +280,8 @@ body.grupo-info-page {
 }
 
 .grupo-info-page .btn-remover:hover { background: #fef2f2; }
+
+/* valor combinado (nov.) */
+.grupo-info-page .valor-combinado { margin: 8px 0 0; font-size: 14px; color: #334155; }
+.grupo-info-page .valor-combinado strong { color: #15803d; }
+.grupo-info-page .valor-combinado.sem-valor { color: #94a3b8; font-size: 13px; }
