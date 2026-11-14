@@ -129,10 +129,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
-    },
-}
+# Sem SMTP configurado: o "e-mail" é impresso no terminal do servidor
+# (perfeito pra demonstração - o link de redefinir senha aparece lá).
+# Em produção, basta trocar pelo backend SMTP.
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "vaijunto <nao-responda@vaijunto.com.br>"

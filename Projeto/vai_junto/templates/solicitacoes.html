@@ -141,6 +141,27 @@
     .btn-recusar:hover {
       background-color: #F8FAFC;
     }
+
+    .secao {
+      font-size: 13px;
+      font-weight: bold;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 18px 0 10px;
+      text-align: left;
+    }
+
+    .status {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .status-pendente { background-color: #FEF3C7; color: #B45309; }
+    .status-aceita { background-color: #DCFCE7; color: #15803D; }
+    .status-recusada { background-color: #FEE2E2; color: #B91C1C; }
   </style>
 </head>
 
@@ -148,58 +169,61 @@
 
   <div class="caixa">
     <h2>vaijunto</h2>
-    <h1>Solicitações recebidas</h1>
-    <p class="descricao">Aceite ou recuse os estudantes que pediram vaga na sua carona.</p>
+    <h1>Solicitações</h1>
+    <p class="descricao">Aceite ou recuse as caronas que te procuraram — e acompanhe as que você enviou.</p>
 
+    <p class="secao">Recebidas</p>
+
+    {% for sol in recebidas %}
     <div class="carona-info">
-      <b>Botafogo → PUC-Rio</b>
-      Amanhã, 07h30 · 2 vagas disponíveis
+      <b>{{ sol.rota.origem }} → {{ sol.rota.id_instituicao.sigla }}</b>
+      {{ sol.rota.horario|default:"Horário a combinar" }}
+      {% if sol.tipo == 'oferta' %}· {{ sol.solicitante.nome }} ofereceu carona pra você{% endif %}
     </div>
 
     <div class="solicitacao">
       <div class="aluno">
-        <div class="foto">AF</div>
+        <div class="foto">{{ sol.solicitante.nome|slice:":2"|upper }}</div>
         <div class="info">
-          <div class="nome">Ana Ferreira</div>
-          <div class="detalhe">Direito · Copacabana</div>
+          <div class="nome">{{ sol.solicitante.nome }}</div>
+          <div class="detalhe">{{ sol.solicitante.email }}</div>
           <div class="verificado">Matrícula verificada</div>
         </div>
       </div>
       <div class="botoes">
-        <button class="btn-aceitar">Aceitar</button>
-        <button class="btn-recusar">Recusar</button>
+        <form method="post" action="{% url 'confirmar_solicitacao' sol.id %}" style="flex:1;">
+          {% csrf_token %}
+          <button type="submit" class="btn-aceitar" style="width:100%;">Aceitar</button>
+        </form>
+        <form method="post" action="{% url 'recusar_solicitacao' sol.id %}" style="flex:1;">
+          {% csrf_token %}
+          <button type="submit" class="btn-recusar" style="width:100%;">Recusar</button>
+        </form>
       </div>
     </div>
+    {% empty %}
+    <p style="text-align:center; color:#64748B; font-size:14px;">Você não tem solicitações pendentes no momento.</p>
+    {% endfor %}
 
-    <div class="solicitacao">
-      <div class="aluno">
-        <div class="foto">RS</div>
-        <div class="info">
-          <div class="nome">Rafael Souza</div>
-          <div class="detalhe">Administração · Flamengo</div>
-          <div class="verificado">Matrícula verificada</div>
-        </div>
-      </div>
-      <div class="botoes">
-        <button class="btn-aceitar">Aceitar</button>
-        <button class="btn-recusar">Recusar</button>
-      </div>
-    </div>
+    <p class="secao">Enviadas por você</p>
 
+    {% for sol in enviadas %}
     <div class="solicitacao">
-      <div class="aluno">
-        <div class="foto">CM</div>
+      <div class="aluno" style="margin-bottom:0;">
+        <div class="foto">{% if sol.tipo == 'pedido' %}{{ sol.rota.id_usuario.nome|slice:":2"|upper }}{% else %}{{ sol.destinatario.nome|slice:":2"|upper }}{% endif %}</div>
         <div class="info">
-          <div class="nome">Carla Martins</div>
-          <div class="detalhe">Psicologia · Laranjeiras</div>
-          <div class="verificado">Matrícula verificada</div>
+          <div class="nome">
+            {% if sol.tipo == 'pedido' %}Você pediu vaga pra {{ sol.rota.id_usuario.nome }}
+            {% else %}Você ofereceu carona pra {{ sol.destinatario.nome }}{% endif %}
+          </div>
+          <div class="detalhe">{{ sol.rota.origem }} → {{ sol.rota.id_instituicao.sigla }} · {{ sol.criada_em|date:"d/m H:i" }}</div>
         </div>
-      </div>
-      <div class="botoes">
-        <button class="btn-aceitar">Aceitar</button>
-        <button class="btn-recusar">Recusar</button>
+        <span class="status status-{{ sol.status }}">{{ sol.status|capfirst }}</span>
       </div>
     </div>
+    {% empty %}
+    <p style="text-align:center; color: #64748B; font-size:14px;">Você ainda não enviou nenhuma solicitação.</p>
+    {% endfor %}
 
   </div>
 

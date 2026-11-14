@@ -5,21 +5,126 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Chat · {{ grupo.nome }} · vaijunto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+  {% if percurso_ativo %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  {% endif %}
 </head>
 
 <body class="chat-page">
 
-  <div class="caixa">
-    <div class="topo">
+  <div class="chat-caixa">
+    <div class="chat-topo">
       <a class="voltar" href="{% url 'grupo_detalhes' grupo.id_grupo %}" aria-label="Voltar ao grupo">‹</a>
-      <div class="foto">{{ grupo.nome|first|upper }}</div>
-      <div>
-        <div class="nome">{{ grupo.nome }}</div>
-        <div class="status">{{ grupo.rota.origem }} → {{ grupo.rota.id_instituicao.sigla }} · {{ grupo.usuarios.count }} membro{{ grupo.usuarios.count|pluralize }}</div>
-      </div>
+      <a class="topo-link" href="{% url 'grupo_info' grupo.id_grupo %}" aria-label="Ver informações do grupo">
+        {% if grupo.foto %}
+          <img class="foto" src="{{ grupo.foto.url }}" alt="Foto do grupo {{ grupo.nome }}">
+        {% else %}
+          <div class="foto">{{ grupo.nome|first|upper }}</div>
+        {% endif %}
+        <div class="topo-info">
+          <div class="nome">{{ grupo.nome }}</div>
+          <div class="status">{{ grupo.rota.origem }} → {{ grupo.rota.id_instituicao.sigla }} · {{ grupo.usuarios.count }} membro{{ grupo.usuarios.count|pluralize }}</div>
+        </div>
+      </a>
+      <a class="logo" href="{% url 'home' %}"><img src="{% static 'css/img/logo.png' %}" alt="vaijunto – caronas universitárias"></a>
     </div>
+
+    {% if percurso_ativo %}
+      <div class="percurso ativo">
+        <div class="percurso-titulo">
+          <svg viewBox="0 0 24 24" class="icone"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>
+          Percurso em andamento
+          <span class="desde"><span class="cronometro" id="cronometro" data-inicio="{{ percurso_ativo.iniciado_em|date:'c' }}">00:00</span> · desde {{ percurso_ativo.iniciado_em|date:"H:i" }}</span>
+        </div>
+        <ol class="paradas">
+          {% for parada in percurso_ativo.paradas.all %}
+            <li class="{{ parada.status }}">
+              <span class="marcador">{% if parada.status == 'concluida' %}✓{% else %}{{ parada.ordem }}{% endif %}</span>
+              <span class="desc">{{ parada.descricao }}</span>
+              {% if e_admin and parada.status == 'pendente' %}
+                <form method="post" action="{% url 'parada_concluir' parada.id_parada %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-cheguei">Cheguei</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ol>
+        {% if e_admin %}
+          <form method="post" action="{% url 'percurso_encerrar' percurso_ativo.id_percurso %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-encerrar">Encerrar percurso</button>
+          </form>
+        {% endif %}
+        <div id="mapa-percurso"></div>
+      </div>
+      {{ pontos_mapa|json_script:"dados-mapa" }}
+      <script>
+      (function () {
+        var pontos = JSON.parse(document.getElementById('dados-mapa').textContent);
+        if (!pontos.length || typeof L === 'undefined') return;
+        var mapa = L.map('mapa-percurso', {scrollWheelZoom: false});
+        // openstreetmap.de (FOSSGIS): mesmo mapa do OSM, gratuito, sem chave
+        // e sem o bloqueio que o servidor principal do OSM aplica ao Codespace
+        L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(mapa);
+        mapa.setView([-22.911, -43.23], 12);  // Rio enquanto geocodifica
+        // Geocodifica os endereços um a um (Nominatim pede no máx. 1 req/s)
+        var coords = [];
+        (function proximo(i) {
+          if (i >= pontos.length) {
+            if (coords.length) {
+              var linha = L.polyline(coords, {color: '#2563eb', weight: 4, opacity: .8}).addTo(mapa);
+              mapa.fitBounds(linha.getBounds(), {padding: [24, 24]});
+            }
+            return;
+          }
+          fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(pontos[i].q))
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+              if (res.length) {
+                var c = [parseFloat(res[0].lat), parseFloat(res[0].lon)];
+                coords.push(c);
+                L.marker(c).addTo(mapa).bindPopup(pontos[i].rotulo).openPopup();
+              }
+            })
+            .catch(function () {})
+            .finally(function () { setTimeout(function () { proximo(i + 1); }, 1100); });
+        })(0);
+      })();
+      </script>
+    {% elif e_admin %}
+      <form class="percurso-iniciar" method="post" action="{% url 'percurso_iniciar' grupo.id_grupo %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-iniciar">
+          <svg viewBox="0 0 24 24" class="icone"><path d="M8 5v14l11-7z"/></svg>
+          Iniciar percurso
+        </button>
+      </form>
+    {% endif %}
+
+    {% if percursos_passados %}
+      <details class="passados">
+        <summary>Percursos passados ({{ percursos_passados|length }})</summary>
+        <ul>
+          {% for p in percursos_passados %}
+            <li>
+              <span class="data">{{ p.iniciado_em|date:"d/m" }} · {{ p.iniciado_em|date:"H:i" }}{% if p.duracao %} – {{ p.finalizado_em|date:"H:i" }}{% endif %}</span>
+              <span class="resumo">{{ p.feitas }}/{{ p.total_paradas }} paradas{% if p.duracao %} · {{ p.duracao }}{% endif %}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
 
     <div class="conversa" id="conversa">
       {% for m in mensagens %}
@@ -36,7 +141,7 @@
     <form class="digitar" method="post">
       {% csrf_token %}
       <input type="text" name="texto" placeholder="Digite uma mensagem..." autocomplete="off" required>
-      <button type="submit">Enviar</button>
+      <button type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24"><path d="M2.7 21.3 23 12 2.7 2.7l-.02 7.47L17 12 2.68 13.83l.02 7.47Z"/></svg></button>
     </form>
   </div>
 
@@ -44,6 +149,19 @@
     // abre a conversa já na última mensagem
     var conversa = document.getElementById('conversa');
     conversa.scrollTop = conversa.scrollHeight;
+
+    // cronômetro do percurso (roda no cliente, para quando encerra)
+    var cron = document.getElementById('cronometro');
+    if (cron) {
+      var inicio = new Date(cron.dataset.inicio).getTime();
+      var dois = function (n) { return String(n).padStart(2, '0'); };
+      (function tic() {
+        var s = Math.max(0, Math.floor((Date.now() - inicio) / 1000));
+        var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+        cron.textContent = (h ? h + ':' + dois(m) : dois(m)) + ':' + dois(s % 60);
+        setTimeout(tic, 1000);
+      })();
+    }
   </script>
 
 </body>

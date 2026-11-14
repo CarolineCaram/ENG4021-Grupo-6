@@ -1,13 +1,18 @@
+import os
 from functools import wraps
 from datetime import date, datetime
 from django.utils import timezone
 
+from django.core import signing
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.hashers import make_password, check_password
 from vai_junto.models import (Usuario, Rota, Grupo, Carona, Instituicao,
-                              HorarioRota, Solicitacao, Mensagem, Veiculo, Avaliacao)
+                              HorarioRota, Solicitacao, Mensagem, Veiculo, Avaliacao,
+                              Percurso, ParadaPercurso)
 
 
 # ---------------------------------------------------------------
@@ -116,47 +121,94 @@ def logout_view(request):
     return redirect('home')
 
 
-def recuperar_senha(request):
-    '''Esqueci minha senha: etapa 1 confere e-mail + matrícula;
-    etapa 2 grava a nova senha e manda pro login.'''
-    erro = None
-    etapa = 2 if request.session.get('recuperar_usuario_id') else 1
+# -------------------------------------------------------------
+# Esqueci minha senha: link assinado enviado por "e-mail"
+# (com o backend de console, o e-mail aparece no terminal do servidor)
+# -------------------------------------------------------------
+_SAL = 'vaijunto-recuperar-senha'
+_TEMPO_LINK = 60 * 60  # o link vale por 1 hora
 
+
+def _token_recuperacao(usuario):
+    # o token carrega o final do hash da senha atual: trocou a senha,
+    # tokens antigos morrem na hora (não dá pra usar o mesmo link duas vezes).
+    # signing.dumps já sai em base64 seguro pra URL.
+    return signing.dumps({'u': usuario.id_usuario, 's': usuario.senha[-20:]}, salt=_SAL)
+
+
+def _usuario_pelo_token(token):
+    try:
+        dados = signing.loads(token, salt=_SAL, max_age=_TEMPO_LINK)
+    except signing.BadSignature:
+        return None
+    usuario = Usuario.objects.filter(id_usuario=dados.get('u')).first()
+    if usuario and usuario.senha.endswith(dados.get('s', '')):
+        return usuario
+    return None
+
+
+def _base_url_site(request):
+    '''Endereço público do site pra montar links de e-mail. No Codespace o
+    proxy de porta não repassa o Host direito, então o endereço sai das
+    variáveis de ambiente do próprio Codespace; fora dele, usa o host normal.'''
+    nome = os.environ.get('CODESPACE_NAME')
+    if nome:
+        dominio = os.environ.get('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN',
+                                 'app.github.dev')
+        host = request.get_host()          # no Codespace chega "localhost:8000"
+        porta = host.split(':')[1] if ':' in host else '8000'
+        return 'https://%s-%s.%s' % (nome, porta, dominio)
+    return request.build_absolute_uri('/').rstrip('/')
+
+
+def recuperar_senha(request):
+    '''Etapa 1: a pessoa informa o e-mail e recebe um link pra redefinir.
+    A resposta é a mesma exista ou não a conta (não deixa adivinhar e-mails).'''
+    enviado = False
     if request.method == 'POST':
-        d = request.POST
-        if d.get('etapa') == '2':
-            usuario = Usuario.objects.filter(
-                id_usuario=request.session.get('recuperar_usuario_id')).first()
-            senha = d.get('senha', '')
-            if not usuario:
-                request.session.pop('recuperar_usuario_id', None)
-                erro = 'Sua sessão expirou. Confirme seu e-mail e matrícula de novo.'
-                etapa = 1
-            elif len(senha) < 8:
-                erro = 'A senha precisa ter pelo menos 8 caracteres.'
-            elif senha != d.get('confirmar', ''):
-                erro = 'As senhas não conferem.'
-            else:
-                usuario.senha = make_password(senha)
-                usuario.save()
-                request.session.pop('recuperar_usuario_id', None)
-                return redirect('login')
-        else:
-            email = d.get('email', '').strip()
-            matricula = d.get('matricula', '').strip()
-            usuario = Usuario.objects.filter(email__iexact=email,
-                                             matricula=matricula).first()
-            if usuario:
-                request.session['recuperar_usuario_id'] = usuario.id_usuario
-                etapa = 2
-            else:
-                erro = 'E-mail e matrícula não conferem com nenhuma conta.'
-                etapa = 1
+        email = request.POST.get('email', '').strip()
+        usuario = Usuario.objects.filter(email__iexact=email).first()
+        if usuario:
+            link = _base_url_site(request) + reverse(
+                'redefinir_senha', args=[_token_recuperacao(usuario)])
+            send_mail(
+                'vaijunto · redefinir sua senha',
+                'Olá, %s!\n\n'
+                'Para definir uma nova senha, abra este link (vale por 1 hora):\n%s\n\n'
+                'Se não foi você que pediu, ignore este e-mail.' % (usuario.nome, link),
+                None, [usuario.email], fail_silently=True)
+        enviado = True
 
     return render(request, 'recuperar_senha.html', {
-        'erro': erro,
-        'etapa': etapa,
+        'etapa': 1,
+        'enviado': enviado,
         'dados': request.POST if request.method == 'POST' else {},
+    })
+
+
+def redefinir_senha(request, token):
+    '''Etapa 2: o link do e-mail abre aqui; a pessoa escolhe a nova senha.'''
+    usuario = _usuario_pelo_token(token)
+    if not usuario:
+        return render(request, 'recuperar_senha.html', {
+            'link_invalido': True,
+        })
+
+    erro = None
+    if request.method == 'POST':
+        senha = request.POST.get('senha', '')
+        if len(senha) < 8:
+            erro = 'A senha precisa ter pelo menos 8 caracteres.'
+        elif senha != request.POST.get('confirmar', ''):
+            erro = 'As senhas não conferem.'
+        else:
+            usuario.senha = make_password(senha)
+            usuario.save()
+            return redirect('login')
+
+    return render(request, 'recuperar_senha.html', {
+        'etapa': 2,
+        'erro': erro,
     })
 
 def verificacao(request):
@@ -242,6 +294,13 @@ def verificar_email(request):
     '''Usado pela etapa 1 do cadastro: diz se o e-mail ainda está livre.'''
     email = request.GET.get('email', '').strip().lower()
     livre = bool(email) and not Usuario.objects.filter(email__iexact=email).exists()
+    return JsonResponse({'disponivel': livre})
+
+
+def verificar_matricula(request):
+    '''Usado pela etapa 2 do cadastro: diz se a matrícula ainda está livre.'''
+    matricula = request.GET.get('matricula', '').strip()
+    livre = bool(matricula) and not Usuario.objects.filter(matricula=matricula).exists()
     return JsonResponse({'disponivel': livre})
 
 
@@ -347,12 +406,11 @@ def cadastro(request):
     })
 
 
-def rotas(request):
-    '''Lista todas as rotas, com busca opcional por origem (?q=...). Exige login.'''
-    usuario = usuario_logado(request)
-    if not usuario:
-        return redirect('login')
-    q = request.GET.get('q', '')
+def _contexto_descobrir(usuario, q=''):
+    '''Contexto completo das abas Rotas/Usuários/Grupos/Solicitações.
+    Usado por TODAS as views que renderizam rotas.html ou gruposrota.html
+    (os dois templates são iguais e precisam das mesmas variáveis — sem isso
+    as abas voltam vazias ao navegar entre as telas).'''
     if usuario.papel == 'dar':
         # quem é só motorista não vê a lista "Rotas disponíveis",
         # só a seção "Passageiros com trajeto parecido"
@@ -425,7 +483,7 @@ def rotas(request):
     sols_recebidas.sort(key=lambda s: s.criada_em, reverse=True)
     pendentes = (sum(1 for s in minhas_sols if s.status == 'pendente')
                  + sum(1 for s in sols_recebidas if s.status == 'pendente'))
-    return render(request, 'rotas.html', {
+    return {
         'rotas': lista, 'search_query': q, 'usuario_logado': usuario,
         'sugestoes': sugestoes,
         'sugestoes_pass': sugestoes_pass,
@@ -434,7 +492,16 @@ def rotas(request):
         'meus_grupos_lista': meus_grupos_lista,
         'minhas_sols': minhas_sols,
         'sols_recebidas': sols_recebidas,
-        'solicitacoes_pendentes': pendentes})
+        'solicitacoes_pendentes': pendentes}
+
+
+def rotas(request):
+    '''Lista todas as rotas, com busca opcional por origem (?q=...). Exige login.'''
+    usuario = usuario_logado(request)
+    if not usuario:
+        return redirect('login')
+    return render(request, 'rotas.html',
+                  _contexto_descobrir(usuario, request.GET.get('q', '')))
 
 def rota_detalhes(request, rota_id):
     rota = get_object_or_404(Rota, id_rota=rota_id)
@@ -469,9 +536,13 @@ def usuario_remover(request, usuario_id):
 def perfil(request, usuario_id):
     usuario = get_object_or_404(Usuario, id_usuario=usuario_id)
     rotas = usuario.rotas.all()
-    # caronas = viagens em grupo da rota dele + caronas em que foi passageiro
-    total_caronas = (Carona.objects.filter(rota__id_usuario=usuario).count()
-                     + usuario.caronas_como_passageiro.count())
+    # caronas contadas = PERCURSOS CONCLUÍDOS (o motorista encerra no chat).
+    # Entrar no grupo (carona aceita) não conta: a viagem só aconteceu de
+    # verdade quando um percurso foi encerrado. O motorista é membro do
+    # próprio grupo, então grupo__usuarios cobre os dois papéis.
+    total_caronas = (Percurso.objects
+                     .filter(grupo__usuarios=usuario, status='concluido')
+                     .count())
     recebidas = list(usuario.avaliacoes_recebidas
                      .select_related('avaliador').order_by('-criada_em'))
 
@@ -614,14 +685,41 @@ def editar_perfil(request):
 @login_necessario
 def grupo_detalhes(request, grupo_id):
     grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
-    return render(request, 'gruposrota.html', {
+    contexto = _contexto_descobrir(request.usuario)
+    contexto.update({
         'detalhe': True,
         'grupo': grupo,
         'membros': grupo.usuarios.all(),
         'mensagens': grupo.mensagens.select_related('usuario'),
-        'usuario_logado': request.usuario,
     })
+    return render(request, 'gruposrota.html', contexto)
 
+def solicitacoes(request):
+    '''Solicitações (RF10): pedidos que você recebeu como motorista, ofertas
+    que você recebeu como passageiro (as duas com aceitar/recusar) e as que
+    você enviou, com o status de cada uma.'''
+    usuario = usuario_logado(request)
+    if not usuario:
+        return redirect('login')
+
+    recebidas = list(Solicitacao.objects
+                     .filter(Q(rota__id_usuario=usuario, tipo='pedido')
+                             | Q(destinatario=usuario, tipo='oferta'),
+                             status='pendente')
+                     .select_related('solicitante', 'destinatario', 'rota',
+                                     'rota__id_instituicao')
+                     .order_by('-criada_em'))
+    enviadas = (Solicitacao.objects
+                .filter(solicitante=usuario)
+                .select_related('rota', 'rota__id_usuario',
+                                'rota__id_instituicao', 'destinatario')
+                .order_by('-criada_em'))
+
+    return render(request, 'solicitacoes.html', {
+        'recebidas': recebidas,
+        'enviadas': enviadas,
+        'usuario_logado': usuario,
+    })
 
 def carona_detalhes(request, carona_id):
     carona = get_object_or_404(Carona, id_carona=carona_id)
@@ -632,46 +730,11 @@ def carona_detalhes(request, carona_id):
 
 @login_necessario
 def grupos_rota(request):
-    '''Etapa 7: estudantes compatíveis (Descobrir) e contatos (Meu grupo).'''
-    usuario = request.usuario
-    rota = ultima_rota(usuario)
-    pode_dirigir = usuario.papel in ('dar', 'ambos')
-    pode_solicitar = usuario.papel != 'dar'
-
-    enviadas = (Solicitacao.objects.filter(solicitante=usuario)
-                .select_related('rota__id_usuario', 'rota__id_instituicao')
-                .order_by('-criada_em'))
-    ja_solicitadas = {s.rota_id for s in enviadas}
-
-    matches = buscar_matches(rota) if rota else []
-    matches = [m for m in matches if m.id_usuario.papel in ('dar', 'ambos')]
-    for m in matches:
-        m.ja_solicitada = m.id_rota in ja_solicitadas
-
-    # aceitar/recusar solicitações é só de quem dá carona (só pedidos;
-    # ofertas que ele enviou aparecem nas enviadas)
-    if pode_dirigir:
-        recebidas = (Solicitacao.objects
-                     .filter(rota__id_usuario=usuario, status='pendente',
-                             tipo='pedido')
-                     .select_related('solicitante', 'rota__id_instituicao'))
-    else:
-        recebidas = []
-
-    pendentes = sum(1 for s in enviadas if s.status == 'pendente') + len(recebidas)
-
-    return render(request, 'gruposrota.html', {
-        'detalhe': False,
-        'rota': rota,
-        'matches': matches,
-        'enviadas': enviadas,
-        'recebidas': recebidas,
-        'pendentes': pendentes,
-        'meus_grupos': usuario.grupos.select_related('rota__id_instituicao'),
-        'usuario_logado': usuario,
-        'pode_dirigir': pode_dirigir,
-        'pode_solicitar': pode_solicitar,
-    })
+    '''Mesma tela do Descobrir (o template gruposrota.html é igual ao
+    rotas.html), então usa exatamente o mesmo contexto.'''
+    contexto = _contexto_descobrir(request.usuario, request.GET.get('q', ''))
+    contexto['detalhe'] = False
+    return render(request, 'gruposrota.html', contexto)
 
 
 @login_necessario
@@ -759,7 +822,8 @@ def recusar_solicitacao(request, solicitacao_id):
 
 @login_necessario
 def grupo_chat(request, grupo_id):
-    '''Chat do grupo: só quem é membro vê e manda mensagens.'''
+    '''Chat do grupo: só quem é membro vê e manda mensagens.
+    Também mostra o percurso em andamento e os percursos passados.'''
     grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
     if not grupo.usuarios.filter(pk=request.usuario.pk).exists():
         return redirect('grupos_rota')
@@ -768,11 +832,163 @@ def grupo_chat(request, grupo_id):
         if texto:
             Mensagem.objects.create(grupo=grupo, usuario=request.usuario, texto=texto)
         return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+    percurso_ativo = (grupo.percursos.filter(status='em_andamento')
+                      .prefetch_related('paradas').first())
+    # pontos pro mapa do percurso (Leaflet): saída, cada passageiro com
+    # endereço cadastrado e a chegada. Quem não tem endereço fica de fora
+    # do mapa (mas continua na lista de paradas).
+    pontos_mapa = []
+    if percurso_ativo:
+        rota = grupo.rota
+        pontos_mapa.append({'rotulo': f'Saída: {rota.origem}',
+                            'q': f'{rota.origem}, Rio de Janeiro'})
+        for p in grupo.usuarios.exclude(pk=rota.id_usuario_id).order_by('nome'):
+            rota_p = ultima_rota(p)
+            if rota_p:
+                pontos_mapa.append({'rotulo': f'Buscar {p.nome.split()[0]}',
+                                    'q': f'{rota_p.origem}, Rio de Janeiro'})
+        pontos_mapa.append({'rotulo': f'Chegada: {rota.id_instituicao.sigla}',
+                            'q': f'{rota.id_instituicao.nome}, Rio de Janeiro'})
+    passados = list(grupo.percursos.filter(status='concluido')
+                    .prefetch_related('paradas'))
+    for p in passados:
+        p.total_paradas = len(p.paradas.all())
+        p.feitas = sum(1 for par in p.paradas.all() if par.status == 'concluida')
+        if p.finalizado_em and p.iniciado_em:
+            minutos = max(1, int((p.finalizado_em - p.iniciado_em).total_seconds() // 60))
+            p.duracao = f'{minutos} min' if minutos < 60 else f'{minutos // 60}h{minutos % 60:02d}'
+        else:
+            p.duracao = ''
     return render(request, 'chat.html', {
         'grupo': grupo,
         'mensagens': grupo.mensagens.select_related('usuario'),
         'usuario_logado': request.usuario,
+        'e_admin': grupo.rota.id_usuario_id == request.usuario.pk,
+        'membros': grupo.usuarios.all(),
+        'percurso_ativo': percurso_ativo,
+        'percursos_passados': passados,
+        'pontos_mapa': pontos_mapa,
     })
+
+
+@login_necessario
+def grupo_info(request, grupo_id):
+    '''Tela de informações do grupo (abre ao tocar no nome no topo do chat).
+    Todo membro vê a lista de pessoas; só o motorista edita nome/foto e
+    remove membros (os botões só aparecem pra ele).'''
+    grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
+    if not grupo.usuarios.filter(pk=request.usuario.pk).exists():
+        return redirect('grupos_rota')
+    membros = list(grupo.usuarios.all())
+    for m in membros:
+        # ponto de origem do trajeto da pessoa (onde o motorista busca)
+        rota_m = ultima_rota(m)
+        m.origem_rota = rota_m.origem if rota_m else None
+    return render(request, 'grupo_info.html', {
+        'grupo': grupo,
+        'membros': membros,
+        'e_admin': grupo.rota.id_usuario_id == request.usuario.pk,
+        'motorista_id': grupo.rota.id_usuario_id,
+        'usuario_logado': request.usuario,
+    })
+
+
+@login_necessario
+def grupo_editar(request, grupo_id):
+    '''Só o motorista (dono da rota) edita o nome e a foto do grupo.
+    Ninguém é adicionado por aqui: entrada no grupo é só pela carona aceita.'''
+    grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
+    if grupo.rota.id_usuario_id != request.usuario.pk:
+        return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        if nome:
+            grupo.nome = nome
+        if request.FILES.get('foto'):
+            grupo.foto = request.FILES['foto']
+        grupo.save()
+    return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+
+
+@login_necessario
+def grupo_remover_membro(request, grupo_id, usuario_id):
+    '''Só o motorista remove alguém do grupo. A pessoa sai do grupo e das
+    caronas dele; o motorista não pode remover a si mesmo.'''
+    grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
+    alvo = get_object_or_404(Usuario, id_usuario=usuario_id)
+    if (grupo.rota.id_usuario_id != request.usuario.pk
+            or alvo.pk == request.usuario.pk):
+        return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+    if request.method == 'POST':
+        grupo.usuarios.remove(alvo)
+        for carona in grupo.caronas.all():
+            carona.passageiros.remove(alvo)
+    return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+
+
+@login_necessario
+def percurso_iniciar(request, grupo_id):
+    '''O motorista inicia o percurso: cria as paradas automaticamente —
+    saída (origem da rota), uma parada pra cada passageiro e a chegada
+    na instituição. Só um percurso em andamento por vez.'''
+    grupo = get_object_or_404(Grupo, id_grupo=grupo_id)
+    if grupo.rota.id_usuario_id != request.usuario.pk:
+        return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+    if request.method == 'POST' and not grupo.percursos.filter(status='em_andamento').exists():
+        percurso = Percurso.objects.create(grupo=grupo)
+        rota = grupo.rota
+        # a saída já começa concluída: é o ponto de partida, ninguém "chega" nela
+        ParadaPercurso.objects.create(percurso=percurso, ordem=1,
+                                      descricao=f'Saída: {rota.origem}',
+                                      status='concluida',
+                                      concluida_em=timezone.now())
+        ordem = 2
+        for p in grupo.usuarios.exclude(pk=request.usuario.pk).order_by('nome'):
+            # endereço da parada = ponto de origem que a pessoa cadastrou
+            # no próprio trajeto (rota mais recente dela)
+            descricao = f'Buscar {p.nome.split()[0]}'
+            rota_p = ultima_rota(p)
+            if rota_p:
+                descricao += f' — {rota_p.origem}'
+                if rota_p.referencia:
+                    descricao += f' ({rota_p.referencia})'
+            ParadaPercurso.objects.create(percurso=percurso, ordem=ordem,
+                                          descricao=descricao)
+            ordem += 1
+        ParadaPercurso.objects.create(
+            percurso=percurso, ordem=ordem,
+            descricao=f'Chegada: {rota.id_instituicao.sigla}')
+    return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+
+
+@login_necessario
+def parada_concluir(request, parada_id):
+    '''O motorista marca uma parada como concluída (chegou no local).'''
+    parada = get_object_or_404(ParadaPercurso, pk=parada_id)
+    grupo = parada.percurso.grupo
+    if (grupo.rota.id_usuario_id == request.usuario.pk
+            and request.method == 'POST'
+            and parada.percurso.status == 'em_andamento'
+            and parada.status == 'pendente'):
+        parada.status = 'concluida'
+        parada.concluida_em = timezone.now()
+        parada.save(update_fields=['status', 'concluida_em'])
+    return redirect('grupo_chat', grupo_id=grupo.id_grupo)
+
+
+@login_necessario
+def percurso_encerrar(request, percurso_id):
+    '''O motorista encerra o percurso: ele vai pra lista de percursos
+    passados do grupo.'''
+    percurso = get_object_or_404(Percurso, pk=percurso_id)
+    grupo = percurso.grupo
+    if (grupo.rota.id_usuario_id == request.usuario.pk
+            and request.method == 'POST'
+            and percurso.status == 'em_andamento'):
+        percurso.status = 'concluido'
+        percurso.finalizado_em = timezone.now()
+        percurso.save(update_fields=['status', 'finalizado_em'])
+    return redirect('grupo_chat', grupo_id=grupo.id_grupo)
 
 
 @login_necessario

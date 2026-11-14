@@ -127,8 +127,15 @@ class Grupo(models.Model):
     rota = models.OneToOneField(Rota, on_delete=models.CASCADE,
                                 db_column='id_rota', related_name='grupo')
     nome = models.CharField(max_length=255)
+    foto = models.FileField(upload_to='grupos/', null=True, blank=True,
+                            db_column='foto')
     usuarios = models.ManyToManyField(Usuario, db_table='grupo_usuario',
                                       related_name='grupos')
+
+    @property
+    def motorista(self):
+        '''O dono da rota é o administrador do grupo.'''
+        return self.rota.id_usuario
 
     class Meta:
         managed = True
@@ -176,6 +183,54 @@ class Carona(models.Model):
 
     def __str__(self):
         return f"Carona {self.data} - {self.rota}"
+
+
+class Percurso(models.Model):
+    '''Um percurso realizado pelo grupo: o motorista inicia quando sai de
+    casa, vai marcando as paradas e encerra ao chegar. Percursos encerrados
+    ficam salvos como "percursos passados" do grupo.'''
+    STATUS = [('em_andamento', 'Em andamento'), ('concluido', 'Concluído')]
+
+    id_percurso = models.AutoField(primary_key=True)
+    grupo = models.ForeignKey(Grupo, on_delete=models.CASCADE,
+                              db_column='id_grupo', related_name='percursos')
+    status = models.CharField(max_length=15, choices=STATUS,
+                              default='em_andamento', db_column='status')
+    iniciado_em = models.DateTimeField(default=timezone.now)
+    finalizado_em = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'percurso'
+        ordering = ['-iniciado_em']
+        verbose_name_plural = "Percursos"
+
+    def __str__(self):
+        return f"Percurso {self.iniciado_em:%d/%m %H:%M} - {self.grupo}"
+
+
+class ParadaPercurso(models.Model):
+    '''Uma parada de um percurso: a saída (casa do motorista), a parada de
+    cada passageiro e a chegada na instituição.'''
+    STATUS = [('pendente', 'Pendente'), ('concluida', 'Concluída')]
+
+    id_parada = models.AutoField(primary_key=True)
+    percurso = models.ForeignKey(Percurso, on_delete=models.CASCADE,
+                                 db_column='id_percurso', related_name='paradas')
+    ordem = models.PositiveSmallIntegerField(db_column='ordem')
+    descricao = models.CharField(max_length=255, db_column='descricao')
+    status = models.CharField(max_length=10, choices=STATUS,
+                              default='pendente', db_column='status')
+    concluida_em = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'parada_percurso'
+        ordering = ['ordem']
+        verbose_name_plural = "Paradas dos percursos"
+
+    def __str__(self):
+        return f"{self.ordem}. {self.descricao}"
 
 
 class Avaliacao(models.Model):
