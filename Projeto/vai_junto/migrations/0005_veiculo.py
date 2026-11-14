@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("vai_junto", "0004_usuario_papel"),
+        ("vai_junto", "0004_usuario_papel_alter_horariorota_id_and_more"),
     ]
 
     operations = [

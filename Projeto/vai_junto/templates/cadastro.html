@@ -146,6 +146,7 @@
 
             <label for="matricula">Número de matrícula</label>
             <input id="matricula" type="text" name="matricula" placeholder="Ex: 2023100456" value="{{ dados.matricula }}" pattern="[0-9]{6,10}" title="Só números, 6 a 10 dígitos" required>
+            <p class="msg-erro" id="msg-matricula" hidden>Esta matrícula já está cadastrada. <a href="{% url 'login' %}">Entrar</a></p>
 
             <div class="aviso">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2L1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg>
@@ -266,6 +267,8 @@
       const msgSenha = document.getElementById('msg-senha');
       const email = document.getElementById('email');
       const msgEmail = document.getElementById('msg-email');
+      const matricula = document.getElementById('matricula');
+      const msgMatricula = document.getElementById('msg-matricula');
       const listaVeiculos = document.getElementById('lista-veiculos');
       const btnAddVeiculo = document.getElementById('btn-add-veiculo');
       const blocoTransporte = document.getElementById('bloco-transporte');
@@ -322,6 +325,7 @@
         if (!btn) return;
         if (btn.dataset.acao === 'proxima' && etapaValida(atual)) {
           if (atual === 1) { verificarEmail().then(function (livre) { if (livre) mostrar(2); }); }
+          else if (atual === 2) { verificarMatricula().then(function (livre) { if (livre) mostrar(3); }); }
           else mostrar(atual + 1);
         }
         if (btn.dataset.acao === 'voltar') mostrar(atual - 1);
@@ -332,6 +336,7 @@
           ev.preventDefault();
           if (etapaValida(atual)) {
             if (atual === 1) { verificarEmail().then(function (livre) { if (livre) mostrar(2); }); }
+            else if (atual === 2) { verificarMatricula().then(function (livre) { if (livre) mostrar(3); }); }
             else mostrar(atual + 1);
           }
         }
@@ -349,6 +354,19 @@
           .catch(function () { return true; });   // se a checagem falhar, o servidor ainda valida no final
       }
       email.addEventListener('input', function () { msgEmail.hidden = true; });
+
+      // Etapa 2: pergunta ao servidor se a matrícula já existe antes de deixar avançar
+      function verificarMatricula() {
+        msgMatricula.hidden = true;
+        return fetch("{% url 'verificar_matricula' %}?matricula=" + encodeURIComponent(matricula.value))
+          .then(function (r) { return r.json(); })
+          .then(function (dados) {
+            if (!dados.disponivel) { msgMatricula.hidden = false; matricula.focus(); }
+            return dados.disponivel;
+          })
+          .catch(function () { return true; });   // se a checagem falhar, o servidor ainda valida no final
+      }
+      matricula.addEventListener('input', function () { msgMatricula.hidden = true; });
 
 
       // Limite de vagas por veículo, em cada linha

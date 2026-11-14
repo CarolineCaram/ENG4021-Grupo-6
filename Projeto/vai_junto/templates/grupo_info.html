@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ grupo.nome }} · grupo · vaijunto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/grupo_info.css' %}">
+</head>
+
+<body class="grupo-info-page">
+
+  <div class="info-topo">
+    <a class="voltar" href="{% url 'grupo_chat' grupo.id_grupo %}" aria-label="Voltar ao chat">‹</a>
+    <span class="titulo">Dados do grupo</span>
+    <a class="logo" href="{% url 'home' %}"><img src="{% static 'css/img/logo.png' %}" alt="vaijunto – caronas universitárias"></a>
+  </div>
+
+  <div class="info-caixa">
+
+    <div class="hero">
+      {% if grupo.foto %}
+        <img class="hero-foto" src="{{ grupo.foto.url }}" alt="Foto do grupo {{ grupo.nome }}">
+      {% else %}
+        <div class="hero-foto letra">{{ grupo.nome|first|upper }}</div>
+      {% endif %}
+      <h1>{{ grupo.nome }}</h1>
+      <p>{{ grupo.rota.origem }} → {{ grupo.rota.id_instituicao.sigla }} · {{ grupo.usuarios.count }} membro{{ grupo.usuarios.count|pluralize }}</p>
+    </div>
+
+    {% if e_admin %}
+      <form class="editar-grupo" method="post" action="{% url 'grupo_editar' grupo.id_grupo %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h2>Editar grupo</h2>
+        <label>Nome do grupo
+          <input type="text" name="nome" value="{{ grupo.nome }}" maxlength="255" required>
+        </label>
+        <label>Foto do grupo
+          <input type="file" name="foto" accept="image/*">
+        </label>
+        <button type="submit" class="btn-salvar">Salvar</button>
+      </form>
+    {% endif %}
+
+    <div class="membros-card">
+      <h2>{{ grupo.usuarios.count }} membro{{ grupo.usuarios.count|pluralize }}</h2>
+      <ul class="membros">
+        {% for m in membros %}
+          <li>
+            <a class="membro-link" href="{% url 'perfil' m.id_usuario %}">
+              {% if m.foto %}
+                <img class="avatar" src="{{ m.foto.url }}" alt="">
+              {% else %}
+                <span class="avatar letra">{{ m.nome|first|upper }}</span>
+              {% endif %}
+              <span class="membro-nome">{{ m.nome }}
+                {% if m.origem_rota %}<span class="membro-end">{{ m.origem_rota }}</span>{% endif %}
+              </span>
+              {% if m.id_usuario == motorista_id %}
+                <span class="papel motorista">motorista</span>
+              {% else %}
+                <span class="papel passageiro">passageiro</span>
+              {% endif %}
+            </a>
+            {% if e_admin and m.id_usuario != motorista_id %}
+              <form method="post" action="{% url 'grupo_remover_membro' grupo.id_grupo m.id_usuario %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-remover">Remover</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+</body>
+</html>

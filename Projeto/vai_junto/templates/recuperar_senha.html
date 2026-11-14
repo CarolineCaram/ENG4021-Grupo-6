@@ -1,18 +1,101 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reportar problema</title>
+  <title>Recuperar senha · vaijunto</title>
+
+  <link rel="preconnect" href="https://fonts.agoogleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/recuperar_senha.css' %}">
+  <link rel="stylesheet" href="{% static 'css/cadastro.css' %}">
 </head>
+
 <body>
-  <main>
-    <h1>Recuperar senha</h1>
-    <p>A recuperação automática ainda não está disponível. Entre em contato com o suporte para redefinir o acesso à sua conta.</p>
-    <p><a href="{% url 'login' %}">Voltar para entrar</a></p>
-  </main>
+  <div class="layout">
+
+    <aside class="painel">
+      <a class="logo" href="/">
+        <img class="logo-img" src="{% static 'css/img/logo.png' %}" alt="vaijunto – caronas universitárias">
+      </a>
+
+      <div class="painel-conteudo">
+        <div class="painel-etapa ativo">
+          <h2>Recupere o acesso à sua conta</h2>
+          <p class="painel-texto">Informe seu e-mail cadastrado e a gente te manda um link para definir uma nova senha.</p>
+          <div class="painel-card">
+            <strong>🔒 Link por e-mail</strong>
+            <span>O link vale por 1 hora e só pode ser usado uma vez. Nesta demonstração, o e-mail aparece no terminal onde o servidor está rodando.</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="area-form">
+      <div class="form-wrap">
+
+        <div class="stepper" aria-hidden="true">
+          <span class="barra {% if etapa == 1 %}ativa{% endif %}"></span>
+          <span class="barra {% if etapa == 2 %}ativa{% endif %}"></span>
+        </div>
+
+        {% if erro %}
+          <div class="alerta-erro" role="alert">{{ erro }}</div>
+        {% endif %}
+
+        {% if link_invalido %}
+        <section class="etapa ativa">
+          <h1>Link inválido</h1>
+          <p class="sub">Este link é inválido, já foi usado ou expirou (ele vale por 1 hora).</p>
+          <a class="btn btn-primario" href="{% url 'recuperar_senha' %}">Pedir um novo link</a>
+        </section>
+        {% elif enviado %}
+        <section class="etapa ativa">
+          <h1>Link enviado!</h1>
+          <p class="sub">Se esse e-mail estiver cadastrado, você vai receber um link para redefinir a senha.</p>
+          <div class="painel-card">
+            <strong>Onde está o e-mail?</strong>
+            <span>Nesta demonstração, o e-mail aparece no <b>terminal onde o servidor está rodando</b> — abra o terminal e copie o link que ele mostrou.</span>
+          </div>
+          <p class="rodape-form">Lembrou a senha? <a href="{% url 'login' %}">Entrar</a></p>
+        </section>
+        {% elif etapa == 1 %}
+        <form method="post">
+          {% csrf_token %}
+          <section class="etapa ativa">
+            <h1>Esqueci minha senha</h1>
+            <p class="sub">Etapa 1 de 2 · Confirmar e-mail</p>
+
+            <label for="email">E-mail cadastrado</label>
+            <input id="email" type="email" name="email" placeholder="Ex: maria@email.com" value="{{ dados.email }}" required>
+
+            <button type="submit" class="btn btn-primario">Enviar link →</button>
+            <p class="rodape-form">Lembrou a senha? <a href="{% url 'login' %}">Entrar</a></p>
+          </section>
+        </form>
+        {% else %}
+        <form method="post">
+          {% csrf_token %}
+          <section class="etapa ativa">
+            <h1>Definir nova senha</h1>
+            <p class="sub">Etapa 2 de 2 · Identidade confirmada ✓</p>
+
+            <label for="senha">Nova senha</label>
+            <input id="senha" type="password" name="senha" placeholder="Mínimo 8 caracteres" minlength="8" required>
+
+            <label for="confirmar">Confirmar nova senha</label>
+            <input id="confirmar" type="password" name="confirmar" placeholder="Repita a nova senha" required>
+
+            <button type="submit" class="btn btn-primario">Salvar nova senha</button>
+          </section>
+        </form>
+        {% endif %}
+
+      </div>
+    </main>
+
+  </div>
 </body>
 </html>
