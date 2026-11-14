@@ -134,3 +134,4 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Em produção, basta trocar pelo backend SMTP.
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "vaijunto <nao-responda@vaijunto.com.br>"
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

@@ -94,3 +94,12 @@
 .rt-nome:hover strong{color:#2563eb}
 .rt-tag{flex-shrink:0;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;background:#dcfce7;color:#15803d;white-space:nowrap}
 .rt-tag-azul{background:#dbeafe;color:#1d4ed8}
+
+/* buscas recentes (nov.) */
+.pesquisas-recentes{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:-14px 0 24px;font-size:12px;color:#64748b}
+.chip-pesquisa{padding:5px 13px;border:1px solid #e2e8f0;border-radius:999px;background:#fff;color:#2563eb;font-size:12px;font-weight:700;text-decoration:none}
+.chip-pesquisa:hover{background:#eff6ff;border-color:#bfdbfe}
+/* Grupo cheio: vagas do veículo esgotadas */
+.solicitacao-enviada.rt-cheio{background:#fee2e2;color:#b91c1c}
+/* Ícone de chat nos botões/links (SVG herda a cor do texto) */
+.icone-chat{vertical-align:-2px;margin-right:5px}

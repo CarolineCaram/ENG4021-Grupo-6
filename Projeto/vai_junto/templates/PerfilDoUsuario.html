@@ -35,6 +35,14 @@
         {% else %}
           <span class="perfil-chip perfil-chip-cinza">Matrícula não verificada</span>
         {% endif %}
+        {% if request.session.usuario_id != usuario.id_usuario %}
+          <form method="post" action="{% url 'seguir' usuario.id_usuario %}" class="seguir-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-seguir{% if ja_sigo %} seguindo{% endif %}">
+              {% if ja_sigo %}Seguindo ✓{% else %}Seguir{% endif %}
+            </button>
+          </form>
+        {% endif %}
       </div>
     </section>
 
@@ -131,6 +139,69 @@
         <strong class="laranja">{{ aprovacao|default:"—" }}</strong>
         <span>aprovação</span>
       </div>
+      <div class="perfil-stat">
+        <strong class="roxo">{{ seguidores|length }}</strong>
+        <span>seguidor{{ seguidores|length|pluralize:"es" }}</span>
+      </div>
+      <div class="perfil-stat">
+        <strong class="roxo">{{ seguindo|length }}</strong>
+        <span>seguindo</span>
+      </div>
+    </section>
+
+    {% if seguidores or seguindo %}
+    <section class="perfil-card">
+      <h2>Seguidores</h2>
+      {% if seguidores %}
+        <details class="seg-detalhes">
+          <summary>{{ seguidores|length }} seguidor{{ seguidores|length|pluralize:"es" }}</summary>
+          <div class="seg-lista">
+            {% for s in seguidores %}
+              <a class="seg-pessoa" href="{% url 'perfil' s.id_usuario %}">
+                <span class="aval-avatar">{% if s.foto %}<img src="{{ s.foto.url }}" alt="">{% else %}{{ s.nome|first|upper }}{% endif %}</span>
+                <span>{{ s.nome }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        </details>
+      {% endif %}
+      {% if seguindo %}
+        <details class="seg-detalhes">
+          <summary>Segue {{ seguindo|length }} pessoa{{ seguindo|length|pluralize:"s" }}</summary>
+          <div class="seg-lista">
+            {% for s in seguindo %}
+              <a class="seg-pessoa" href="{% url 'perfil' s.id_usuario %}">
+                <span class="aval-avatar">{% if s.foto %}<img src="{{ s.foto.url }}" alt="">{% else %}{{ s.nome|first|upper }}{% endif %}</span>
+                <span>{{ s.nome }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        </details>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <section class="perfil-card">
+      <h2>Histórico</h2>
+      {% if historico %}
+        <div class="hist-lista">
+          {% for p in historico %}
+            <div class="hist-item">
+              <div class="hist-topo">
+                <strong>{{ p.grupo.rota.origem }} → {{ p.grupo.rota.id_instituicao.sigla }}</strong>
+                <span class="hist-papel {{ p.papel_na_viagem }}">{{ p.papel_na_viagem }}</span>
+              </div>
+              <span class="hist-meta">
+                {{ p.iniciado_em|date:"d/m/Y" }} · {{ p.iniciado_em|date:"H:i" }}{% if p.duracao %} – {{ p.finalizado_em|date:"H:i" }} ({{ p.duracao }}){% endif %}
+                · {{ p.feitas }}/{{ p.total_paradas }} paradas
+                {% if p.grupo.valor %} · R$ {{ p.valor_fmt }}/pessoa{% endif %}
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="perfil-vazio">Nenhuma carona concluída ainda — o histórico aparece depois do primeiro percurso encerrado.</p>
+      {% endif %}
     </section>
 
     <section class="perfil-card">
@@ -261,6 +332,11 @@
 
       <a class="perfil-editar" href="{% url 'editar_perfil' %}">
         <span>🖉 Editar perfil</span>
+        <span class="perfil-chevron">›</span>
+      </a>
+
+      <a class="perfil-editar perfil-trocar" href="{% url 'logout' %}">
+        <span><svg class="icone-trocar" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3l4 4-4 4"/><path d="M20 7H9a2 2 0 0 0-2 2"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h11a2 2 0 0 0 2-2"/></svg> Trocar de conta</span>
         <span class="perfil-chevron">›</span>
       </a>
     {% endif %}

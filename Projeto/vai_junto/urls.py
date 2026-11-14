@@ -48,6 +48,7 @@ urlpatterns = [
     path('caronas/<int:carona_id>/confirmada/', views.confirmacao_carona, name='confirmacao_carona'),
     path('conta/editar/', views.editar_perfil, name='editar_perfil'),
     path('perfil/<int:usuario_id>/avaliar/', views.avaliar, name='avaliar'),
+    path('perfil/<int:usuario_id>/seguir/', views.seguir, name='seguir'),
 ]
 
 # Serve as fotos de perfil em desenvolvimento (python manage.py runserver)

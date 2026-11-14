@@ -172,7 +172,6 @@
     <h1>Solicitações</h1>
     <p class="descricao">Aceite ou recuse as caronas que te procuraram — e acompanhe as que você enviou.</p>
 
-<<<<<<< HEAD
     <p class="secao">Recebidas</p>
 
     {% for sol in recebidas %}
@@ -180,12 +179,6 @@
       <b>{{ sol.rota.origem }} → {{ sol.rota.id_instituicao.sigla }}</b>
       {{ sol.rota.horario|default:"Horário a combinar" }}
       {% if sol.tipo == 'oferta' %}· {{ sol.solicitante.nome }} ofereceu carona pra você{% endif %}
-=======
-    {% for sol in solicitacoes %}
-    <div class="carona-info">
-      <b>{{ sol.rota.origem }} → {{ sol.rota.id_instituicao.sigla }}</b>
-      {{ sol.rota.horario|default:"Horário a combinar" }}
->>>>>>> 51c6eff35b3fd64d32ed331e42f10bec67368cde
     </div>
 
     <div class="solicitacao">
@@ -206,7 +199,6 @@
           {% csrf_token %}
           <button type="submit" class="btn-recusar" style="width:100%;">Recusar</button>
         </form>
-<<<<<<< HEAD
       </div>
     </div>
     {% empty %}
@@ -231,12 +223,6 @@
     </div>
     {% empty %}
     <p style="text-align:center; color: #64748B; font-size:14px;">Você ainda não enviou nenhuma solicitação.</p>
-=======
-      </div>
-    </div>
-    {% empty %}
-    <p style="text-align:center; color:#64748B; font-size:14px;">Você não tem solicitações pendentes no momento.</p>
->>>>>>> 51c6eff35b3fd64d32ed331e42f10bec67368cde
     {% endfor %}
 
   </div>

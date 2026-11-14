@@ -131,6 +131,25 @@ class Grupo(models.Model):
                             db_column='foto')
     usuarios = models.ManyToManyField(Usuario, db_table='grupo_usuario',
                                       related_name='grupos')
+    # valor TOTAL da carona, dividido igualmente entre os passageiros;
+    # None = carona sem cobrança. Só o motorista define/edita no chat.
+    valor = models.DecimalField(max_digits=6, decimal_places=2,
+                                null=True, blank=True, db_column='valor')
+    # grupo sem nenhum passageiro é encerrado (o motorista fica só):
+    # sai do "Meus grupos" e do Descobrir, mas os percursos/histórico
+    # ficam guardados. Se uma nova solicitação for aceita, ele reabre.
+    encerrado_em = models.DateTimeField(null=True, blank=True,
+                                        db_column='encerrado_em')
+
+    @property
+    def encerrado(self):
+        '''Encerrado de verdade = marcado (encerrado_em) OU sem nenhum
+        passageiro. A segunda condição cobre grupos esvaziados ANTES dessa
+        regra existir: um grupo sem passageiros se comporta como encerrado
+        mesmo sem a marca.'''
+        if self.encerrado_em is not None:
+            return True
+        return not self.usuarios.exclude(pk=self.rota.id_usuario_id).exists()
 
     @property
     def motorista(self):
@@ -209,6 +228,44 @@ class Percurso(models.Model):
         return f"Percurso {self.iniciado_em:%d/%m %H:%M} - {self.grupo}"
 
 
+class Seguidor(models.Model):
+    '''Um usuário segue o outro: seguidor -> seguido.'''
+    seguidor = models.ForeignKey(Usuario, on_delete=models.CASCADE,
+                                 db_column='id_seguidor', related_name='seguindo')
+    seguido = models.ForeignKey(Usuario, on_delete=models.CASCADE,
+                                db_column='id_seguido', related_name='seguidores')
+    criada_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'seguidor'
+        unique_together = ('seguidor', 'seguido')
+        ordering = ['-criada_em']
+        verbose_name_plural = "Seguidores"
+
+    def __str__(self):
+        return f"{self.seguidor} segue {self.seguido}"
+
+
+class PesquisaRecente(models.Model):
+    '''Últimas buscas da pessoa na tela Descobrir (uma linha por termo;
+    buscar o mesmo termo de novo só atualiza a data).'''
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE,
+                                db_column='id_usuario', related_name='pesquisas')
+    termo = models.CharField(max_length=255, db_column='termo')
+    criada_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'pesquisa_recente'
+        unique_together = ('usuario', 'termo')
+        ordering = ['-criada_em']
+        verbose_name_plural = "Pesquisas recentes"
+
+    def __str__(self):
+        return f"{self.usuario} buscou '{self.termo}'"
+
+
 class ParadaPercurso(models.Model):
     '''Uma parada de um percurso: a saída (casa do motorista), a parada de
     cada passageiro e a chegada na instituição.'''
@@ -219,6 +276,11 @@ class ParadaPercurso(models.Model):
                                  db_column='id_percurso', related_name='paradas')
     ordem = models.PositiveSmallIntegerField(db_column='ordem')
     descricao = models.CharField(max_length=255, db_column='descricao')
+    # de quem é a parada de busca (saida/chegada ficam sem passageiro)
+    passageiro = models.ForeignKey(Usuario, on_delete=models.SET_NULL,
+                                   null=True, blank=True,
+                                   db_column='id_passageiro',
+                                   related_name='paradas')
     status = models.CharField(max_length=10, choices=STATUS,
                               default='pendente', db_column='status')
     concluida_em = models.DateTimeField(null=True, blank=True)
