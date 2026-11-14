@@ -1056,3 +1056,19 @@ def confirmacao_carona(request, carona_id):
         'vagas_restantes': max(rota.vagas - passageiros.count(), 0),
         'usuario_logado': request.usuario,
     })
+
+def solicitacoes(request):
+    '''Lista os pedidos de carona pendentes que o motorista recebeu (RF10).'''
+    usuario = usuario_logado(request)
+    if not usuario:
+        return redirect('login')
+
+    pendentes = (Solicitacao.objects
+                 .filter(rota__id_usuario=usuario, tipo='pedido', status='pendente')
+                 .select_related('solicitante', 'rota', 'rota__id_instituicao')
+                 .order_by('-criada_em'))
+
+    return render(request, 'solicitacoes.html', {
+        'solicitacoes': pendentes,
+        'usuario_logado': usuario,
+    })
