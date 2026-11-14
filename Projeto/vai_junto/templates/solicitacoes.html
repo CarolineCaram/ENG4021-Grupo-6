@@ -151,55 +151,35 @@
     <h1>Solicitações recebidas</h1>
     <p class="descricao">Aceite ou recuse os estudantes que pediram vaga na sua carona.</p>
 
+    {% for sol in solicitacoes %}
     <div class="carona-info">
-      <b>Botafogo → PUC-Rio</b>
-      Amanhã, 07h30 · 2 vagas disponíveis
+      <b>{{ sol.rota.origem }} → {{ sol.rota.id_instituicao.sigla }}</b>
+      {{ sol.rota.horario|default:"Horário a combinar" }}
     </div>
 
     <div class="solicitacao">
       <div class="aluno">
-        <div class="foto">AF</div>
+        <div class="foto">{{ sol.solicitante.nome|slice:":2"|upper }}</div>
         <div class="info">
-          <div class="nome">Ana Ferreira</div>
-          <div class="detalhe">Direito · Copacabana</div>
+          <div class="nome">{{ sol.solicitante.nome }}</div>
+          <div class="detalhe">{{ sol.solicitante.email }}</div>
           <div class="verificado">Matrícula verificada</div>
         </div>
       </div>
       <div class="botoes">
-        <button class="btn-aceitar">Aceitar</button>
-        <button class="btn-recusar">Recusar</button>
+        <form method="post" action="{% url 'confirmar_solicitacao' sol.id %}" style="flex:1;">
+          {% csrf_token %}
+          <button type="submit" class="btn-aceitar" style="width:100%;">Aceitar</button>
+        </form>
+        <form method="post" action="{% url 'recusar_solicitacao' sol.id %}" style="flex:1;">
+          {% csrf_token %}
+          <button type="submit" class="btn-recusar" style="width:100%;">Recusar</button>
+        </form>
       </div>
     </div>
-
-    <div class="solicitacao">
-      <div class="aluno">
-        <div class="foto">RS</div>
-        <div class="info">
-          <div class="nome">Rafael Souza</div>
-          <div class="detalhe">Administração · Flamengo</div>
-          <div class="verificado">Matrícula verificada</div>
-        </div>
-      </div>
-      <div class="botoes">
-        <button class="btn-aceitar">Aceitar</button>
-        <button class="btn-recusar">Recusar</button>
-      </div>
-    </div>
-
-    <div class="solicitacao">
-      <div class="aluno">
-        <div class="foto">CM</div>
-        <div class="info">
-          <div class="nome">Carla Martins</div>
-          <div class="detalhe">Psicologia · Laranjeiras</div>
-          <div class="verificado">Matrícula verificada</div>
-        </div>
-      </div>
-      <div class="botoes">
-        <button class="btn-aceitar">Aceitar</button>
-        <button class="btn-recusar">Recusar</button>
-      </div>
-    </div>
+    {% empty %}
+    <p style="text-align:center; color:#64748B; font-size:14px;">Você não tem solicitações pendentes no momento.</p>
+    {% endfor %}
 
   </div>
 

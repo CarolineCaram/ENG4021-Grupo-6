@@ -23,6 +23,7 @@ urlpatterns = [
     path('cadastro/', views.cadastro, name='cadastro'),
     path('cadastro/verificar-email/', views.verificar_email, name='verificar_email'),
     path('rotas/', views.rotas, name='rotas'),
+    path('solicitacoes/', views.solicitacoes, name='solicitacoes'),
     path('rotas/<int:rota_id>/', views.rota_detalhes, name='rota_detalhes'),
     path('rotas/<int:rota_id>/contatar/', views.contatar, name='contatar'),          # NOVA
     path('usuarios/', views.usuarios, name='usuarios'),
